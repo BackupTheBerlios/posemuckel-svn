@@ -1,0 +1,206 @@
+﻿Testen und Debuggen
+
+0. Inhalt
+
+1. Einleitung
+2. Debuggen
+2.1 Object#toString()
+2.2 Netzwerk
+3. JUnitTests
+3.1 Allgemeines
+3.2 Testen auf dem laufenden Server
+3.3 Übersicht über die Testsuites
+3.4 Einige interessante Testmethoden
+
+
+1. Einleitung
+
+Der Zweck dieses Dokumentes ist es, die wichtigsten Einstellungsmöglichkeiten zum 
+Debuggen per Konsolenausgabe zu beschreiben sowie die Arbeitsweise einiger JUnitTests 
+vorzustellen.
+
+Änderungen: 
+in Abschnitt 3.1 einen Absatz zu statischen Methoden und Singeltons geschrieben
+
+2. Debuggen
+
+2.1 Object#toString()
+
+Es ist manchmal sehr hilfreich, die wichtigsten Eigenschaften eines Objektes
+auf der Konsole auszugeben. Wenn diese Eigenschagten nicht direkt über getter-
+Methoden zugänglich sind, kann die Methode toString(), die jedes Objekt hat, 
+überschrieben werden. Wenn das Objekt in einen String eingebaut oder mit
+System.out.println() auf der Konsole ausgegeben wird, wird dann die Methode
+toString() aufgerufen und die gewünschten Infos erscheinen auf der Konsole.
+
+2.2 Netzwerk
+
+Sämtliche im Folgenden beschriebenen Debuggingeinstellungen dienen dazu, den 
+Nachrichtenaustausch zwischen Client und Server abzuhören. Die Ausgabe erfolgt immer 
+auf der Konsole. Zum Debuggen sind die folgenden Klassen interessant:
+• VerboseClientReader
+• VerboseServerReader
+• ForkedWriter (ist obsolet)
+• MessageHandler
+Der DebuggModus der verschiedenen Klassen kann über die folgenden Einstellungen 
+(zum Beispiel in Client#main) geregelt werden:
+
+	  VerboseServerReader.isVerbose(false);
+	  VerboseClientReader.isVerbose(true);
+	  Message_Handler.setDebugModus(false);
+	  ForkedWriter.printToStream(false);
+Für die JUnitTests gibt es in der Klasse posemuckel.client.Settings die Möglichkeit, 
+diese Einstellungen vorzunehmen. Ein Beispiel für die Anwendung findet sich in 
+posemuckel.client.UserTest in den Methoden setUp() und tearDown().
+
+VerboseClientReader und VerboseServerReader sind von BufferedReader abgeleitete Klassen, 
+die die Methode readLine() von BufferedReader überschreiben. In diesen Klassen wird 
+beim Aufruf von readLine() zunächst die Methode der Superklasse BufferedReader aufgerufen 
+und das Gelesene in einem String zwischengespeichert. Ist der DebuggModus aktiviert, wird 
+der String mit ein paar Zusatzinformationen (wer liest?, ist es eine Leerzeile?) auf der 
+Konsole ausgegeben. In jedem Fall wird der gelesene String unverändert über die 
+return-Anweisung ausgegeben, so dass sich die Klassen nach außen wie ein BufferedReader 
+verhalten.
+
+ForkedWriter ist nimmt die Ausgabe, die in einen PrintWriter geschrieben werden soll und 
+gibt sie im DebuggModus zusätzlich an einen PrintStream weiter. Im Client wird als 
+PrintStream zum Debuggen System.out verwendet, so dass sich beobachten, wann der Client 
+was an den Server schickt. Die Funktion von ForkedWriter kann in der Regel durch 
+VerboseServerReader ersetzt werden, da der Server das liest, was der Client schreibt.
+
+MessageHandler verfügt ebenfalls über einen DebugModus. In diesem wird der vom Client und 
+vom Server gelesene Header (also die ersten drei Zeilen einer Nachricht) auf der Konsole 
+ausgegeben. Die Ausgabe erfolgt zur Zeit nur, falls der Header vollständig gelesen werden 
+konnte (es wird auf null als Eingabe getestet).
+
+Bekannte Probleme:
+
+Es ist bereits öfter vorgekommen, das bei nicht RFC-konformen Nachrichten eine Zeile zu 
+viel oder eine Zeile zu wenig gelesen wurde, so dass die jeweils nachfolgende Nachricht 
+in den Zeilen verschoben ist. Dies läst sich durch die Verbindung von MessageHandler und 
+VerboseXYZReader (im DebuggModus) feststellen. Der VerboseXYZReader gibt Auskunft darüber, 
+welche Teile einer Nachricht überhaupt gesendet wurden, während der MessageHandler anzeigt,
+ob der Hash bzw. Nickname an erster Stelle im Header gelesen wurde. Hat sich der Hash 
+verschoben, so wurde die vorherige Nachricht nicht korrekt gelesen, was die Anzahl der 
+Zeilen angeht. Das Problem kann dann auftreten, wenn Client und Server verschiedene 
+Versionen des RFC-Protokolls verwenden.
+
+3. JUnitTests
+
+3.1 Allgemeines
+
+Alle JUnitTests können über AllTests im Paket posemuckel gestartet werden. 
+Die TestSuite AllTestsOnRunningServer hat damit allerdings manchmal Probleme. 
+Bevor ein Test als fehlgeschlagen eingestuft wird, sollt die Testsuite separat
+laufen.
+
+HINWEIS: einen TestCase aus AllTestsOnRunningServer als separaten JUnitTest laufen
+zu lassen, funktioniert in der Regel nicht, da einige Datensätze in der DB vorhanden
+sein müssen, die erst in posemuckel.server.StartServer angelegt werden. Außerdem
+muss der Server laufen. (siehe auch 3.2)
+
+Wenn ein TestCase als JUnitTest ausgeführt wird, ist die Reihenfolge, in der die 
+Methoden des TestCase aufgerufen werden wie folgt:
+setUp() – testMethodOne() – tearDown() – setUp() – testMethodTwo() – tearDown() ...
+In der Methode setUp() wird die Testumgebung initialisiert, die für jede der 
+Testmethoden benötigt wird. Wenn in setUp() oder der Testmethode Änderungen am 
+System vorgenommen wurden, die sich nicht durch die neue Initialisierung von Objekten 
+in setUp() aufheben lassen, so müssen diese Änderungen in der Methode tearDown() 
+explizit rückgängig gemacht werden. Bei fehlschlagenden Tests muss auch überprüft 
+werden, ob die Anweisungen in tearDown() alle korrekt ausgeführt werden. 
+
+Bei fehlschlagenden Tests muss auch überprüft werden, ob in statischen Variablen 
+Werte gespeichert werden, die weder durch setUp() noch durch tearDown() zurückgesetzt 
+werden. Ein besonderes Problem in diesem Zusammenhang sind Singeltons. Für sie besteht
+keine Möglichkeit, durch Initialisieren die Objekte in den Anfangszustand zurückzuversetzen.
+Daher muss in der Methode tearDown() (und nicht am Ende des Testes, gleiche Problematik
+wie im vorherigen Absatz) das Singelton wieder in den Anfangszustand zurückgesetzt werden.
+
+In unseren Tests gibt es zwei Situationen, in denen tearDown() wichtig wird. Zum Einen
+beim Arbeiten mit der Datenbank, zum Anderen beim Arbeiten mit der Netzwerkverbindung.
+
+Datenbank:
+Wenn in einem Test ein User in der Datenbank gespeichert wird, so muss der Datensatz 
+in tearDown() wieder gelöscht werden; ansonsten kann es bei einer wiederholten 
+Ausführung des Testes zu Fehlern kommen. Das Löschen des Users gehört nicht an das 
+Ende der Testmethode, da der Code dort nicht ausgeführt wird, wenn eine assert-Anweisung
+fehlschlägt oder ein Error auftritt. 
+
+Netzwerkverbindung
+Um das Netzwerk auf Clientseite neu zu initialisieren, muss die Verbindung bei 
+entsprechenden Tests in tearDown() beendet und der Socket geschlossen werden. 
+In setUp() wird die Verbindung für den nächsten Test wieder neu aufgebaut. Für ein 
+Beispiel siehe posemuckel.client.UserTest.
+
+3.2 Testen auf dem laufenden Server
+
+Es gibt einige JUnitTests, die einen laufenden Server benötigen. Diese Tests sind
+in AllTestsOnRunningServer zusammengefasst. Über die TestKlassen ServerStart und ServerStop
+im Paket posemuckel.server wird der Server gestartet bzw. angehalten. Dabei wird auch
+eine Testumgebung in der DB initialisiert. Wenn der Test ServerStart fehlschlägt,
+können die Tests auf dem laufenden Server nicht mehr funktionieren :-)
+
+ServerStart benötigt zum Starten des Servers eine Konfigurationsdatei. Diese
+muss im Feld ServerStart#config manuell vor dem Starten der Testsuite gesetzt
+werden, damit der Server im Test korrekt gestartet werden kann. Es wird der absolute
+Pfad zu der Konfigurationsdatei erwartet.
+
+3.3 Übersicht der Testsuites
+
+Die Klassen sind nach TestSuites geordnet. Die Übersicht ist nicht vollständig.
+
+AllTests.....................Startet alle JUnitTests 
+  AllServerTests...............Alle Tests für den Server, bei denen dieser nicht laufen muss; hier
+                                sind auch die Tests für die DB enthalten.
+  AllTestsOnRunningServer......Alle Tests auf dem laufenden Server: der Server wird am Anfang der 
+  								TestSuite gestartet und am Ende der TestSuite gestoppt. Außerdem wird 
+  								eine Testumgebung für die Tests auf Netbase eingerichtet und wieder
+  								aufgeräumt. 
+    AllClientTestsOnNetbase....Alle Tests, die den Aufruf von Services des Servers testen: der 
+                                Test beginnt mit dem Aufruf der Schnittstelle, die die GUI verwendet
+                                und prüft, ob die vom Server kommenden Daten korrekt in das Model
+                                eingearbeitet werden und die Events, mit denen die GUI über Änderungen
+                                des Models informiert wird, gefeuert werden. Diese Tests benötigen
+                                einen laufenden Server und bestimmte Datensätze in der DB (siehe oben)
+  AllBrowserTests..............Alle Tests zum Filtern des Statustextes des Browsers und zum
+                                    ListenerManagment des Browsers
+  AllCommonTests...............???
+  AllClientTests...............Alle Tests zum Paketformat RFC0815 von Clientseite aus
+  AllEventTests................Alle Tests zum ListenerManagment des Models: einfügen und entfernen der
+  							     Listener im ListenerManagment (testet nur die allgemeine Funtionsweise)
+  AllModelTests................Alle Tests zur internen Logik des Models
+  
+3.4 einige interessante Testmethoden
+
+Wie kann das Senden einer Nachricht über ClientMessage/ das Model und die 
+anschließende Verarbeitung im Client (ServerMessage/ das Model)getestet werden?
+
+Das Problem bei diesen Tests sind die vielen Threads, die auf Client- und Serverseite
+involviert sind. Eine normale Testmethode in JUnit läuft nach dem Abzweigen eines
+Threads weiter. Nachfolgende assert-Anweisungen schlagen fehl. Über Thread.sleep(time) ließe
+sich die Testmethode zwingen, eine Weile auf die Ausführung des Thread zu warten. 
+Allerdings werden die Tests dadurch sehr langsam. Damit der Test (meistens) grün läuft, müssen
+recht hohe Werte für time angegeben werden. Im Mittel kann der Wert aber deutlich unter der
+mit time angegebenen Grenze liegen. Einen Ausweg aus diesem Dilemma bietet die Klasse 
+RetriedAssert (in posemuckel.common). Die Klasse ist so konstruiert, dass eine 
+assert-Anweisung alle n Millisekunden ausgeführt wird. Ein Test wird beendet, wenn alle
+assert-Anweisungen grün laufen. Wenn bei einer assert-Anweisung das Timeout erreicht 
+wird, wird der Test ebenfalls beendet: er gilt als fehlgeschlagen. 
+Derartige Tests finden sich bei uns in posemuckel.client. Die Tests gehören zu
+AllTestsOnRunningServer.
+
+Wie kann getestet werden, ob eine Exception auch geworfen wird?
+
+Dieses Problem ist bei uns bisher noch nicht aufgetreten. Mit einem kleinen
+Trick ist aber nicht weiter schwierig, derartige Tests durchzuführen:
+
+testThrowingException() {
+  try {
+    doSomething();	//in dieser Methode soll eine Exception geworfen werden
+    fail("XYZException was not thrown");
+  } catch (XYZException expected) {
+  //der Stacktrace ist nicht interessant
+  } 
+}
+
+

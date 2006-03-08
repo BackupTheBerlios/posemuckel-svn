@@ -1,0 +1,125 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+  <HEAD>
+    <META http-equiv="content-type" content="text/html; charset=windows-1250">
+    <META name="generator" content="PSPad editor, www.pspad.com">
+    <TITLE>
+      Posemuckel Hilfe - Benutzer finden
+    </TITLE>
+  </HEAD>
+  <BODY>
+    <P>
+      <A href=index.htm>Zurück zur Übersicht</A>
+    </P>
+    <P>
+      <H4>Benutzer finden</H4>
+      In der Projektübersicht kann man im Menü über
+      <I>Benutzer -> Benutzersuche</I>
+      den Dialog zur Benutzersuche aufrufen. Dort kann man alle registrierten
+      Benutzer durch bestimmte Kriterien filtern. Zur Verfügung stehen
+      die Felder
+      <I>Vorname, Nachname, Username, Sprache und Geschlecht</I>. Einträge
+      in mehrerer dieser Felder werden mit einem logischen UND verknüpft:
+      Eine Suche nach einem Vornamen "Jens" und dem Geschlecht "weiblich" wird
+      wahrscheinlich kein Ergebnis haben!
+      </p>
+      <p>
+      Besonderer Erläuterung bedarf das Feld
+      <I>Freitextsuche</I>
+      : Hier
+      können alle Benutzerdaten (außer Wohnort und Emailadresse) gleichzeitig
+      abgefragt werden. Eine Freitextsuche nach "Klaus" findet sowohl Benutzer
+      mit eben jenem Vornamen, Usernamen oder Nachnamen. Die Freitextsuche
+      schließt übrigens auch das Feld
+      <I>Kommentar</I>
+      eines Benutzers ein.
+    </P>
+    <P>
+      <IMG src="Images/findUser.jpg" alt="findUser.jpg, 43 kB" title="findUser" height="378" width="710">
+    </P>
+    
+    <H4>Unterstützung von Wildcards</H4>
+    <P>
+      In allen Feldern können sogenannte
+      <I>Wildcards</I>
+      benutzt werden, als Wildcards gelten folgende Zeichen:
+    </P>
+    <P>
+      <B>*</B>
+      steht für eine beliebige Anzahl von Zeichen
+      <BR>
+      <B>?</B>
+      steht für genau ein Zeichen
+      <BR>
+      <P>
+        Beispiele:
+        <TABLE border cellpadding=10>
+          <TR>
+            <TD>
+              <I>Eine Suche nach:</I>
+            </TD>
+            <TD>
+              <I>im Feld:</I>
+            </TD>
+            <TD>
+              <I>findet:</I>
+            </TD>
+          </TR>
+          <TR>
+            <TD>
+              ?arina
+            </TD>
+            <TD>
+              Vorname
+            </TD>
+            <TD>
+              Carina, Karina, Marina, ...
+            </TD>
+          </TR>
+          <TR>
+            <TD>
+              M*ler
+            </TD>
+            <TD>
+              Nachname
+            </TD>
+            <TD>
+              Müller, Möller, Moeller, Maler, Meinke-Stadler, ...
+            </TD>
+          </TR>
+          <TD>
+            ?arina*
+          </TD>
+          <TD>
+            Username
+          </TD>
+          <TD>
+            Karina26, carina1977, Marinade, ...
+          </TD>
+          </TR>
+          <TR>
+            <TD>
+              Ich * ?ein ?acho*ein!
+            </TD>
+            <TD>
+              Freitextsuche
+            </TD>
+            <TD>
+              Benutzer mit Kommentar:
+              <BR>
+              Ich bin kein Machoschwein!,
+              <BR>
+              Ich will Dein Nacho sein!, ...
+            </TD>
+          </TR>
+        </TABLE>
+        <P>
+          In der Freitextsuche kann eine Suche mit Wildcards unter Umständen
+          ein reichhaltiges Ergebnis liefern!
+        </P>
+      </P>
+      <P>
+        <A href=index.htm>Zurück zur Übersicht</A>
+      </P>
+  </BODY>
+</HTML>

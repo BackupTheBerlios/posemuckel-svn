@@ -1,0 +1,168 @@
+<html>
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=windows-1252">
+<meta name=Generator content="Microsoft Word 11 (filtered)">
+<title>Posemcukel SAG (System Administrator's Guide)</title>
+<style>
+<!--
+ /* Style Definitions */
+ p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{margin:0cm;
+	margin-bottom:.0001pt;
+	text-autospace:none;
+	font-size:12.0pt;
+	font-family:"Times New Roman";
+	color:black;}
+p.MsoCaption, li.MsoCaption, div.MsoCaption
+	{margin-top:6.0pt;
+	margin-right:0cm;
+	margin-bottom:6.0pt;
+	margin-left:0cm;
+	text-autospace:none;
+	font-size:10.0pt;
+	font-family:"Times New Roman";
+	color:black;
+	font-style:italic;}
+p.MsoList, li.MsoList, div.MsoList
+	{margin:0cm;
+	margin-bottom:.0001pt;
+	text-autospace:none;
+	font-size:12.0pt;
+	font-family:"Times New Roman";
+	color:black;}
+p.MsoBodyText, li.MsoBodyText, div.MsoBodyText
+	{margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:6.0pt;
+	margin-left:0cm;
+	text-autospace:none;
+	font-size:12.0pt;
+	font-family:"Times New Roman";
+	color:black;}
+p.Verzeichnis, li.Verzeichnis, div.Verzeichnis
+	{margin:0cm;
+	margin-bottom:.0001pt;
+	text-autospace:none;
+	font-size:12.0pt;
+	font-family:"Times New Roman";
+	color:black;}
+span.Nummerierungszeichen
+	{color:black;}
+ /* Page Definitions */
+ @page Section1
+	{size:612.0pt 792.0pt;
+	margin:70.85pt 70.85pt 2.0cm 70.85pt;}
+div.Section1
+	{page:Section1;}
+ /* List Definitions */
+ ol
+	{margin-bottom:0cm;}
+ul
+	{margin-bottom:0cm;}
+-->
+</style>
+
+</head>
+
+<body lang=DE style='text-justify-trim:punctuation'>
+
+<div class=Section1>
+
+<p class=MsoNormal><span lang=EN-US>Posemcukel SAG (System Administrator's
+Guide)</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;</span></p>
+
+<p class=MsoNormal><span style='font-size:16.0pt'>1. Installation der Datenbank</span></p>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<p class=MsoNormal>Der Server ist mir MySQL Version 4.1 getestet. Nach
+Installation des entsprechenden Software-Paketes von der MySQL Website müssen
+noch einige Dinge angepasst werden:</p>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<p class=MsoNormal>Das root-Kennwort muss angepasst werden.</p>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<p class=MsoNormal>/usr/local/mysql/bin/mysqladmin -u root password [KENNWORT]
+(zur Zeit muss das Kennwort „lifecycle“ lauten. (unter Windows die Pfadangabe
+weglassen )</p>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<p class=MsoNormal>Dann muss eine Datenbank angelegt werden. Dies ist
+vorzugsweise die Datenbank mit dem Namen posemuckel.</p>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<p class=MsoNormal><span lang=EN-US>mysql -u root -p</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>CREATE DATABASE posemuckel;</span></p>
+
+<p class=MsoNormal>quit</p>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<p class=MsoNormal>Dann wird die Struktur der Datenbank eingespielt oder eben
+die Demo-Datenbank, damit man gleich etwas Inhalt zum Testen hat:</p>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<p class=MsoNormal><span lang=EN-US>mysql -u root -p posemuckel
+&lt;workspace/cscw2/server/demo-db.sql</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;</span></p>
+
+<p class=MsoNormal><span style='font-size:16.0pt'>2. Installation eines MTA zum
+Senden von Mails</span></p>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<p class=MsoNormal>Unter Windows kann das Sendmail von
+http://www.indigostar.com/sendmail.htm verwendet werden. Unter Linux
+installiert man einfach seinen lieblings-MTA wir Exim, Sendmail, Postfix,
+MasqMail, Qmail, ...</p>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<p class=MsoNormal>Bei der Software von Indigostar muss man die Datei
+sendmail.ini im Zielverzeichnis der Sendmail-Installation editieren. Wichtig
+sind die drei folgenden Zeilen:</p>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<p class=MsoNormal>AUTHENTICATE=y</p>
+
+<p class=MsoNormal>USERNAME=meinmailaccount</p>
+
+<p class=MsoNormal>PASSWORD=meinmailpasswort</p>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<p class=MsoNormal>Je nachdem, auf welchem Betriebssystem der Server läuft,
+muss dann die Konfiguration des Posemuckel-Servers angepasst werden, so dass
+der String SENDMAIL_CMD nach den Ersetzungen der Makros in ein ausführbares
+Kommando mündet.</p>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<p class=MsoNormal style='margin-left:14.15pt;text-indent:-14.15pt'><span
+lang=EN-US style='font-size:16.0pt'>3.</span><span lang=EN-US style='font-size:
+16.0pt'>DynDNS &amp; Co</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN-US> ipcheck -i eth0 -g -f Benutzer Passwort
+posemuckel.dnsalias.org</span></p>
+
+</div>
+
+</body>
+
+</html>

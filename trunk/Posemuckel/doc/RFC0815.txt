@@ -1,0 +1,1333 @@
+RFC 0815 (PMP - Posemuckel Message Protocol)
+
+Version 1.34
+
+0. Inhalt
+==========
+
+1. Einleitung
+
+2. Changelog
+
+3. Grober Ablauf der Kommunikation
+
+4. Allgemeines Nachrichten-Schema
+
+5. Übersicht welche Nachrichten vom Client/Server gesendet werden
+
+6. Registrierung
+
+7. Anmelden
+
+8. Abmelden
+
+9. Buddies verwalten
+
+10. Projekte verwalten
+
+11. Chats
+
+12. Profile
+
+13. URL-Verläufe und Notizen
+
+14. Endergebnis/RATED_URLS
+
+15. TODO
+
+
+1. Einleitung:
+==============
+
+Die Basis dieses Protokolls ist das einfache Beispiel von Atalk, bei den
+ASCII-Strings versandt werden, um den Chat zu realisieren.
+Die Kommunikation läuft zentral über den Server. Es wird davon ausgegangen,
+dass der Benutzername eindeutig ist. Die Kommunikation erfolgt über TCP, so
+dass davon ausgegangen wird, dass die gesendeten Nachrichten auch
+tatsächlich ankommen.
+
+WICHTIGER HINWEIS:
+Das Lesen dieses Dokumentes geschieht auf eigene Gefahr. Wenn du davon Pickel
+bekommst oder sonstigen Ärger, besteht keinerlei Anspruch auf Schadenersatz oder
+Schmerzensgeld, sofern dies die geltenden Gesetze zulassen. :-)
+
+In eckigen Klammern Dargestellte Teile sind optional. Die Werte in runden
+Klammern werden vom sendenden Programm eingefügt.
+
+
+2. Changelog:
+=============
+
+Änderungen nach 1.38
+
+in Kapitel 14 hinzugefügt:
+-GET_FOLDERSYSTEM und die Antwort FOLDERSYSTEM
+-PARENTFOLDER_CHANGED
+
+nicht implementierte Nachrichten wurden entfernt 
+
+
+
+Änderungen nach 1.34
+
+In Kapitel 11. Chat hinzugefügt:
+
+-GET_SAME_URL_VIEWERS
+-SAME_URL_VIEWERS
+
+Änderungen nach 1.33
+
+In Kapitel 14. Endergebnis hinzugefügt:
+-NEW_FOLDER
+_DELETE_FOLDER
+-MOVE_FOLDER
+
+Änderungen nach 1.32
+
+-Der Eindeutigkeit halber RATINGS in RATED_URLS umbenannt
+
+Änderungen nach 1.31:
+
+-Es wurden Nachrichten zum Versenden und Empfangen von Notizen in Abschnitt
+ 'URL-Verläufe und Notizen' definiert:
+-ADD_NOTE zum Senden von Notizen zu einer Webseite
+-GET_NOTES zum Empfangen von Notizen
+-NOTES wird als Antwort auf GET_NOTES gesendet
+-NEW_NOTE an alle Clients des Projektes als Reaktion auf ADD_ NOTE
+
+Änderungen nach 1.30:
+
+- Im Abschnitt zu den URL-Verläufen wurden zwei neue Nachrichten definiert:
+	GET_WEBTRACE und WEBTRACE. Diese dienen der Aktualisierung der Daten im
+	Client.
+
+
+Änderungen nach 1.29 :
+
+-MEMBER_CHANGE-Nachricht, wenn sich die Zusammensetzung der Mitgliederliste eines
+ Projektes ändert. Die Nachricht wird nur an die Mitglieder, die das Projekt 
+ geöffnet haben, versendet. Die Nachricht freeSpacesChanged reicht wegen der 
+ Behandlung der Einladungen nicht aus, um eine Änderung anzuzeigen.
+-VIEWING-Nachricht: analog zu VISITING; die Nachricht wird immer dann gesendet,
+ wenn der Anwender zwar die Webseite besucht, aber keine VISITING-Nachricht sendet
+
+Änderungen von 1.26 nach 1.27 :
+
+- Kapitel 14. Endergebnis/Ratings ergänzt
+
+Änderungen von 1.25 nach 1.26 :
+
+- Kapitel 14. Endergebnis/Ratings hinzugefügt
+
+Änderung von 1.22 nach 1.23:
+
+-Es wurde eine Voting-Nachricht zur Abgabe einer Bewertung eingefügt
+
+Änderungen von 1.21 nach 1.22:
+
+- Die PRESENT Nachticht heitß jetzt auch NOTIFY.
+
+Änderungen von 1.20 nach 1.21:
+
+- Bei dem Abschnitt zu den URL-Verläufen sind Nachrichten für die Hochhalte-
+Funktion hinzugekommen. Dies sind die Nachrichten NOTIFY und PRESENT.
+
+Änderungen von Version 1.18 nach 1.19:
+
+-Der Client kann eine Liste aller offenen Einladungen mit GET_INVITATIONS abrufen.
+-Der Client wird über eine neue Einladung mit NEW_INVITATION informiert
+-Der Client kann eine Einladung mit DONT_ACCEPT_PROJECT ausschlagen
+
+Änderungen von Version 1.16 nach 1.17:
+
+- Das Datum der Erzeugung wurde bei den Projekteigenschaften (Abschnitt 10) ergänzt.
+
+- Die Anzahl der freien Plätze eines Projektes wird bei einer Änderung
+  über die Nachricht FREESPACES_CHANGED an alle anderen Benutzer weiterge-
+  geben.
+
+- Die Nachricht GET_USERS wurde in SEARCH_USERS umbenannt. Sie und auch die Antwortnachricht
+	wurden vom Aufbau her ergänzt.
+
+- Ein neuer Abschnitt zu URL-Verläufen wurde eingeführt. Als erste Nachricht in diesem 
+	Abschnitt wird VISITING definiert, mit der über besuchte Webseiten informiert wird.
+
+Änderungen von Version 1.15 nach 1.16:
+
+- START_PROJECT wird vom Server im Erfolgsfall mit zwei Nachrichten beantwortet
+
+Änderungen von Version 1.14 nach 1.15:
+
+- START_PROJECT kann jetzt auch mit einer Fehlermeldung vom Server beantwortet werden
+
+Änderungen von Version 1.12 nach 1.14:
+
+- USER_STATUS Nachricht hinzugefügt.
+- Im Abschnitt zu den Projekten wurden die Nachrichten
+	OPEN_PROJECT, PROJECT_CHAT, GET_ACTIVE_USERS und ACTIVE_USERS
+	hinzugefügt.
+
+
+Änderungen zu Version 1.12:
+
+-Kapitel 12 aufgelöst und die Nachrichten zu den Projekten bzw. Profilen verschoben
+-neues Kapitel 12: profiles (hier ist bis auf GET_USERS alles neu!)
+-CHAT_MEMBERS: auch wenn ein Anwender den Chat verläßt, wird die Nachricht versendet
+-JOIN_CHAT: CHAT_MEMBERS ist keine Antwort des Servers
+-USER_STATUS: den Client über eine Änderung des Status eines Buddys informieren
+-GET_PROJECTS: die zu übertragenden Daten haben sich geändert, außerdem werden von den 
+              privaten Projekten nur noch diejenigen übertragen, zu denen der Anwender
+              auch eingeladen ist
+-MY_PROJECTS: die zu übertragenden Daten haben sich geändert(siehe GET_PROJECTS)
+-GET_CHAT_MEMBERS: fordert eine Liste der Chatmitglieder an
+
+
+
+Format von CHAT so geändert, dass eine Zeilenzahl in count mit übergeben wird;
+alle Vorkommen von \r oder \n müssen durch \r\n ersetzt werden
+(ist bereits implementiert)
+
+Änderungen von Version 1.5 nach 1.6:
+
+-Changelog hinzugefügt.
+-Inhaltsverzeichnis hinzugefügt.
+-Übersicht zu den Paketen hinzugefügt.
+-Umbenennung der Antworten zu MY_BUDDIES und MY_PROJECTS
+	in YOUR_BUDDIES und YOUR_PROJECTS. Hier waren BUDDIES und MY_PROJECTS 
+	als Antworten vorgesehen, was weder sinnfällig noch einheitlich war.
+-Entfernung des Client-Hash aus den Paketen NEW_BUDDY und YOUR_BUDDIES. Der
+	Client-Hash der anderen Buddies ist für die anderen Clients nicht
+	interessant. Hier reicht der Benutzername des entsprechenden Benutzers zur
+	identifikation, da der Benutzername eindeutig ist.
+-Entfernung fälschlicherwiese angegebener \r\n-s am Ende von Nachtichten.
+	ist im allgemeinen Paketformat enthalten.
+-Setzen von runden Klammern, wo Werte von der entsprechenden Software
+	eingesetzt werden müssen.
+-Modifikation des allgemeinen Nachrichtenformats, so dass Nachrichten-IDs
+	mitgesendet werden, damit eine Zuordnung zwischen gesendeter und
+	empfangener Nachricht erfolgen kann.
+-Festlegung der möglichen Werte für GENDER und LANGUAGE bei der Registrierung
+	sowie dass LOCATION und COMMENT leer sein dürfen.
+-Bei allen (!) Nachrichten wird die Anzahl der Nachrichtenparameter in einem 
+	separaten Header mitgeschickt (siehe Abschnitt 4. Allgemeines 
+	Nachrichtenschema)
+
+
+3. Grober Ablauf der Kommunikation:
+===================================
+
+
+Der Client muss sich zunächst registrieren. Dies geschieht mit einer
+bestimmten REGISTER-Nachricht.
+
+Der Client kann sich dann mit seinem Passwort einloggen. Hierzu dient eine
+spezielle LOGIN-Nachricht. Dieser Vorgang wird bei Erfolg vom Server mit
+der Zuweisung eines Hash-Wertes beantwortet, der die MD5 Prüfsumme des
+Strings ist, der sich bei Hintereinanderschreiben von Benutzername und Passwort
+ergibt. Der zugewiesene Hash-Wert wird vom Client dann stets bei allen Paketen
+mitgesendet, so dass er sich dadurch eindeutig authentifiziert.
+
+Unmittelbar nach dem Anmelden muss der Client die Buddy-Liste und die Liste
+der Projekte des Benutzers abfragen. Dies geschieht mit speziellen Nachrichten.
+
+Während der Sitzung werden die verschiedensten Nachrichten verschickt. So zum
+Beispiel Nachrichten für den Chat oder zur Verwaltung von Buddies und Projekten.
+
+Mit einer LOGOUT-Nachricht kann der Client explizit die Kommunikation beenden.
+
+
+4. Allgemeines Nachrichten-Schema
+=================================
+
+Bei den Trennsymbolen einzelner Nachrichrichtenbestandteile wurde HTTP als Vorbild
+genommen. Dort wird ein Carriage-Return mit einem Newline verbunden: \r\n
+Dies scheint ziemlich eindeutig zu sein.
+
+Alle Pakete, die verschickt werden, haben ein einheitliches Schema:
+
+[CLIENT-HASH]\r\nMESSAGE-ID\r\nMESSAGE-COUNT\r\nMESSAGE\r\n
+
+Sendet der Server ein von ihm generiertes Paket an einen Client, entfällt
+der erste Teil [CLIENT-HASH], wenn er aber eine Chat-Nachricht von einem
+anderen Client weiterleitet, ersetzt er dessen Hash-Wert durch den
+Benutzername des Benutzers, der die Chat-Nachricht geschrieben hat. Ein
+einheitliches Paketschema hat den Vorteil, dass die Methoden, die das Paket
+aufsplitten, sowohl im Client wie auch im Server verwendet werden können.
+
+Dem Server ist durch den Hash-Wert immer bekannt, von welchem User er
+eine Nachricht erhält. Der Hash-Wert ist von der IP-Adresse unabhängig
+und wird vom Server berechnet und jedem Client individuell beim Login
+zugewiesen.
+
+Die Message-ID wird vom jedem Client erzeugt. Sie identifiziert jedes vom
+Client gesendete Paket eindeutig. Dies geschieht über einen inkrementierten
+Zähler. Der Server kopiert diese ID in die von ihm gesendete Antwortnachricht.
+So kann der Client jede Antwort einer gesendeten Nachticht zuordenen und
+auch bei mehreren ERROR-Nachrichten jeweils unterschiedlich reagieren.
+
+Message-COUNT enthält die Anzahl der Parameter einer Message.
+
+Eine Message hat das Format
+
+METHODE\r\nPARAMETER1\r\n...PARAMETERN
+
+...wobei es auch gar keine Parameter geben kann und dann so aussieht
+
+METHODE
+
+Das Ende eines Pakets wird durch \r\n gekennzeichnet, wie oben im
+Paketformat angegeben.
+
+
+5. Übersicht welche Nachrichten vom Client/Server gesendet werden
+=================================================================
+
+
+Client sendet				mögl. Antwort des Servers
+-------------------------------------------------------------------
+REGISTER					ACK, wenn alles OK
+							USER_EXISTS, wenn der Benutzername
+									schon existiert.
+LOGIN						ACCESS_GRANTED, wenn alles OK
+							ACCESS_DENIED, bei einem Fehler.
+
+//Bei den Nachfolgenden Nachrichten Antwortet der Server immer mit
+//ACCESS_DENIED, falls der Client nicht eingelogt ist.
+
+LOGOUT						ACK bei Erfolg
+ADD_BUDDY			 		NEW_BUDDY, wenn alles geklappt hat.
+							ERROR, sonst.
+DEL_BUDDY					ACK, wenn alles geklappt hat.
+							ERROR, sonst.
+MY_BUDDIES					YOUR_BUDDIES, wenn alles geklappt hat.
+							ERROR, sonst.
+START_PROJECT				NEW_PROJECT an alle und ACK an den Client bei erfolgreichem Anlegen, sonst ERROR oder ACCESS_DENIED.
+JOIN_PROJECT				ACK, bei Erfolg.
+LEAVE_PROJECT				ACK, bei Erfolg.
+DONT_ACCEPT_PROJECT			ACK, bei Erfolg.
+MY_PROJECTS					YOUR_PROJECTS, bei Erfolg.
+CHAT						CHAT mit Hash durch Benutzername ersetzt.
+TYPING						keine weitere Antwort
+READING						keine weitere Antwort
+START_CHAT					NEW_CHAT, bei Erfolg.
+JOIN_CHAT					ACK bei Erfolg.
+GET_CHAT_MEMBERS			CHAT_MEMBERS bei Erfolg
+GET_PROJECTS				PROJECTS, bei Erfolg.
+GET_INVITATIONS				PROJECTS, bei Erfolg.
+SEARCH_USERS				USERS, bei Erfolg.
+SET_PASSWORD				ACK, bei Erfolg
+GET_PROFILE					PROFILE, bei Erfolg
+							ERROR, sonst (nicht existierender User in der Anforderung)
+SET_PROFILE					ACK, bei Erfolg
+OPEN_PROJECT				PROJECT_CHAT bei Erfolg,
+							ERROR sonst.
+GET_ACTIVE_USERS			ACTIVE_USERS bei Erfolg,
+							ERROR sonst.
+VISITING					keine Antwort, wenn alles klappt
+VIEWING						keine Antwort
+NOTIFY						ACK, wenn empfangen
+VOTING						keine Antwort, wenn alles klappt
+GET_WEBTRACE				WEBTRACE, wenn alles klappt, ERROR sonst.
+ADD_NOTE					keine Antwort, wenn alles klappt
+GET_NOTES					NOTES bei Erfolg, ERROR sonst.
+NEW_FOLDER					keine Antwort, wenn alles klappt
+DELETE_FOLDER				keine Antwort, wenn alles klappt
+MOVE_FOLDER					keine Antwort, wenn alles klappt
+PARENTFOLDER_CHANGED		keine Antwort, wenn alles klappt
+GET_FOLDERSYSTEM 			FOLDERSYSTEM bei Erfolg
+
+
+//die folgenden Nachrichten werden vom Server ohne Aufforderung an den Client geschickt
+
+							USER_STATUS, wenn sich der Status des Buddys ändert
+							CHAT_MEMBERS, wenn sich die Teilnehmerliste eines Chat ändert
+							VISITING, wenn ein anderer Benutzer eine neue Seite besucht.
+							VOTING, wenn eine Bewertung abgegeben wurde
+							NEW_INIVTATION, wenn ein Benutzer zu einem Projekt eingeladen wurde
+							NOTIFY, wenn ein anderer Benutzer eine Website zeigen will.
+							MEMBER_CHANGE, wird an alle Projektmitglieder versendet, die das
+								Projekt geöffnet haben
+							NEW_NOTE, wenn einen neue Anmerkung zu einer URL hinzukommt
+							NEW_FOLDER, wenn ein neuer Folder im Projekt erzeugt wurde
+							DELETE_FOLDER, wenn ein Folder im Projekt gelöscht wurde
+							MOVE_FOLDER, wenn ein Folder im Projekt den Parentfolder geändert hat
+							PARENTFOLDER_CHANGED, wenn sich im Projekt der Parentfolder einer URL ändert
+							
+
+6. Registrierung
+================
+
+Um sich als neuer Benutzer zu registrieren, sendet ein User mit seinem
+Client die folgende Message Informationen an den Server. Das erste Feld
+des Pakets, der Client-Hash bleibt leer.
+
+REGISTER\r\n
+
+(NAME)\r\n
+
+(NACHNAME)\r\n
+
+(EMAIL)\r\n
+
+(BENUTZERNAME)\r\n
+
+(PASSWORT)\r\n
+
+(LANGUAGE)\r\n
+
+(GENDER)\r\n
+
+(LOCATION)\r\n
+
+(COMMENTS)
+
+Diese Informationen stammen aus dem Registrierungsformular. Das
+Registrierungsformular muß sicherstellen, dass alle Felder bis auf
+LOCATION und COMMENTS nicht leer sind.
+
+Zulässige Werte für GENDER sind "MALE" und "FEMALE".
+
+LANGUAGE wird in der Sprachkodierung nach ISO 639-1 in
+Großbuchstaben angegeben.
+
+Der Server antortet entweder mit
+
+ACK
+
+für eine erfolgreiche Registrierung oder mit
+
+USER_EXISTS
+
+falls der Benutzername (ein wählbarer Spitzname) schon existiert. Andere Fehlermeldungen
+können noch vorgesehen werden. Der Benutzername wird in verschiedenen Paketen,
+die von Clients gesendet werden zur eindeutigen Identifikation anderer
+Benutzer verwendet.
+
+
+7. Anmelden
+===========
+
+Wenn ein User sich einlogen will, dann schickt sein Client die Message
+
+LOGIN\r\n
+
+(USER)\r\n
+
+(PASSWORD)
+
+Der Server antwortet mit der Message
+
+ACCESS_DENIED
+
+, das Login scheitert. Die Antwort im Positiven Falle ist ein einfaches
+
+ACCESS_GRANTED
+
+Der Server schickt mit dieser Nachricht zum ersten Mal einen Client-Hash.
+Dieser wird auf dem Server aus Benutzername und Passwort erzeugt. Benutzername
+und Passwort werden dabei hintereinander geschrieben und darüber die MD5
+Summe gebildet. Die MD5 Summe ist dann der Client-Hash. Der Client-Hash
+wird benötigt, um die Nachrichten den Benutzern zuordnen zu können. Er
+wird vom Server in der Datenbank abgelegt, um ausfallsicher zu sein. Der
+Client speichert den Hash-Wert ebenfalls ab und schickt ihn mit jeder
+neuen Nachricht im Kopf, um sich damit zu identifizieren.
+
+Diese Architektur, den Hash-Wert vom Server erzeugen zu lassen, wurde gewählt,
+um die Berechnung des Hash-Wertes jederzeit ohne Änderung an den Clients
+modifizieren zu können. Einziges Kriterium dabei ist, dass allen Benutzern,
+die gerade online sind, ein eindeutiger Wert zugeordnet wird.
+
+
+8. Abmelden
+===========
+
+Wenn der Client die Nachricht
+
+LOGOUT
+
+schickt, dann wird er ausgelogt. Erhält der Server ein LOGOUT von einem
+Client, der bereits ausgelogt ist, sendet er ein
+
+ACCESS_DENIED
+
+Bestätigt wird das Logout mit ACK.
+
+Wird die Verbindung zwischen Client und Server unterbrochen, wird der
+Client automatisch ausgeloggt und muss sich nach dem Aufbau einer neuen
+Verbindung erst wieder einloggen um mit dem Server wieder kommunizieren
+zu können.
+
+
+9. Buddies verwalten
+====================
+
+Mit der folgenden Nachricht kann ein Buddy hinzugefügt werden:
+
+ADD_BUDDY\r\n
+
+(BUDDY)
+
+Dabei ist BUDDY der Benutzername des Buddies. Der Server antwortet mit
+
+NEW_BUDDY\r\n
+
+(STATUS)
+
+an den Client zurück. Als möglicher Status kommen ONLINE und OFFLINE
+in Frage.
+
+
+Gleichermaßen kann ein Buddy gelöscht werden:
+
+DEL_BUDDY\r\n
+
+(BUDDY)
+
+Der Server antwortet hier mit ACK, wenn die Aktion erfolgreich ausgeführt
+werden konnte. Andernfalls mit ERROR, falls es einen Fehler gab oder mit
+ACCESS_DENIED, falls der sendende Client nicht eingelogt ist. Mit der
+Nachricht
+
+MY_BUDDIES
+
+kann ein Client explizit seine Buddy-Liste anfordern. Der Server
+antwortet mit:
+
+YOUR_BUDDIES\r\n
+
+(BUDDY1)\r\n
+
+(STATUS1)\r\n
+
+...
+
+(BUDDYN)\r\n
+
+(STATUSN)
+
+
+Mit der Nachricht 
+
+USER_STATUS\r\n
+
+(USER)\r\n
+
+(STATUS)
+
+informiert der Server alle eingeloggten Anwender, die User als Buddy eingetragen haben,
+über die Statusänderung des Buddys.
+
+10. Projekte verwalten
+======================
+
+Der Client sendet die folgende Nachricht an den Server, wenn er mit
+anderen eine Gruppe aufmachen will:
+
+START_PROJECT\r\n
+
+(TOPIC)\r\n
+
+(0/1)\r\n // 0 = privat, 1 = öffentlich
+
+(MAX_USERS)\r\n
+
+(DESCRIPTION)\r\n
+
+(USER1_TO_INVITE)\r\n
+
+...
+
+(USERN_TO_INVITE)
+
+
+Der Server richtet daraufhin das neue Projekt ein und verschickt eMails
+an die eingeladenen Benutzer. Der Server antwortet mit ACCES_DENIED,
+falls der sendende Benutzer nicht angemeldet ist und im Falle eines Scheiterns 
+aus anderem Grund ERROR. Im Erfolgsfalle verschickt der Server die Daten des 
+neu angelegten Projektes an alle eingeloggten User:
+
+NEW_PROJECT\r\n
+
+(PROJECT_ID)r\n
+
+(TOPIC)\r\n
+
+(0/1)\r\n
+
+(DESCRIPTION)\r\n
+
+und an den Client der das neue Projekt angelegt hat zusätzlich ein ACK.
+
+Wenn ein Benutzer zu dem Projekt eingeladen wurde, erhält er ein
+
+NEW_INVITATION\r\n
+
+(PROJECT_ID)
+
+vom Server.
+
+Will ein Benutzer einem Projekt beitreten, dann geht das mit
+
+JOIN_PROJECT\r\n
+
+(PROJECT-ID)
+
+ein Projekt verlassen geht mit
+
+LEAVE_PROJECT\r\n
+
+(PROJECT-ID)
+
+Wenn jemand zum Projekt beitritt oder es verläßt(?), wird an alle Projektmitglieder die Nachricht
+
+MEMBER_CHANGE\r\n
+
+PROJECT\r\n
+
+(ID)\r\n
+
+0/1			(0 für verlassen und 1 für beitreten)
+
+versendet. Damit lassen sich die Mitglieder, die gerade beim Surfen sind, über
+neue Projektteilnehmer informieren. Die Nachricht ist so gestaltet, dass
+sie auch für Chats wiederverwendet werden kann.
+
+Der Server antwortet dann dem Benutzer mit ACK und den anderen Projekt-
+mitgliedern mit
+
+FREESPACES_CHANGED\r\n
+
+(PROJECT-ID)\r\n
+
+(-1)\r\n
+
+im Erfolgsfall nach JOIN_PROJECT oder mit
+
+FREESPACES_CHANGED\r\n
+
+(PROJECT-ID)\r\n
+
+(+1)\r\n
+
+im Erfolgsfall nach LEAVE_PROJECT, sonst ACCESS_DENIED.
+
+Eine Einladung ausschlagen geht mit 
+
+DONT_ACCEPT_PROJECT\r\n
+
+(PROJECT-ID)
+
+Der Server antwortet im Erfolgsfalle im ACK.
+
+Der Server liefert mit
+
+GET_PROJECTS
+
+alle angelegten öffentlichen Projekte
+sowie alle privaten Projekte, bei denen der Anwender eingeladen
+ist (also nicht alle privaten Projekte!):
+
+PROJECTS\r\n
+
+(PROJECT1)\r\n
+
+PROJECT enthält alle Daten des Projektes
+
+(PROJECT2)\r\n
+
+...
+
+(PROJECTn)
+
+Zu den Daten eines Projektes gehören:
+
+(ID)\r\n
+
+(TOPIC)\r\n
+
+(OWNER)\r\n
+
+(ISPRIVATE)\r\n (0=privat; 1=öffentlich)
+
+(ZAHL DER FREIEN PLÄTZE)\r\n
+
+(ZAHL DER PLÄTZE GESAMT)\r\n
+
+(DESCRIPTION)
+
+(Datum)
+
+Datum ist das Datum der Erzeugung des Projektes
+(wird vom Server bei Bearbeitung der Anfrage gesetzt).
+
+Ebenso kann ein Client mit der Nachricht
+
+MY_PROJECTS
+
+seine Projekte anfordern. Ist der User nicht eingelogt, kommt ein
+ACCESS_DENIED. Im Erfolgsfall antwortet der Server mit allen Projekten,
+an denen der User teilnimmt:
+
+YOUR_PROJECTS\r\n
+
+PROJECT1\r\n Enthält alle Daten des Projektes durch \r\n getrennt
+
+PROJECT2\r\n ... PROJECTn\r\n
+
+
+Mit der Nachricht
+
+OPEN_PROJECT\r\n
+
+(PROJECT_ID)\r\n
+
+informiert ein Client den Server über das Öffnen eines Projektes; damit
+der Client den Chat des Projektes öffnen kann, antwortet der Server mit
+
+PROJECT_CHAT\r\n
+
+(PROJECTCHAT_ID)\r\n
+
+im Erfolgsfall, sonst ERROR
+
+
+Damit ein Client die Benutzer anzeigen kann, die aktiv an einem Projekt
+beteiligt sind (d.h. sie haben das Projekt geöffnet) schickt er an den
+Server die Nachricht
+
+GET_ACTIVE_USERS\r\n
+
+(PROJECT_ID)\r\n
+
+Der Server schickt daraufhin die Nachricht
+
+ACTIVE_USERS\r\n
+
+(USER1)\r\n (USER ist der Nickname)
+....
+(USERn)\r\n
+
+an den Client zurück (im Erfolgsfall, sonst ERROR)
+
+
+11. Chats
+=========
+
+Der Client sendet an den Server die Nachricht
+
+CHAT\r\n
+
+(CHATID)\r\n
+
+(Textnachricht)
+
+wobei letzteres die vom Benutzer eingegebene Textnachricht ist. Sie ist
+in Unicode codiert, um der Internationalisierung gerecht zu werden.
+Falls in der Textnachricht \r oder \n auftaucht, werden diese Zeichen
+durch \r\n ersetzt. Die Anzahl der \r\n in einer Textnachricht wird
+zu der Parameteranzahl (COUNT) dazugezählt; das geschieht alles auto-
+matisch bei der Formatierung (Methode Message.format(...)). Der Server
+antwortet mit ACCESS_DENIED, falls der User nicht eingelogt ist ansonsten
+gibt es keine Antwort. Der Server verteilt die Nachricht an alle User,
+die an dem Chat mit der ID CHATID teilnehmen, ohne sie zu verändern.
+
+Wenn ein User gerade schreibt, kann dessen Client die anderen darüber
+informieren. Dies geschieht mit der Nachricht
+
+TYPING\r\n
+
+(CHAT_ID)
+
+Wenn der User eine Nachricht abschickt, wird dies von den Clients so
+verstanden, dass der User nicht mehr schreibt. Also muss erneut eine
+Nachricht TYPING gesandt werden, wenn der User gleich eine zweite
+Nachricht schreibt. Wenn der User aber keine Nachricht abschickt und
+nicht mehr tippt, dann muss der Client nach einem Timeout von 5 Sekunden
+die Nachricht
+
+READING\r\n
+
+(CHAT_ID)
+
+schicken. Diese beiden Nachrichten werden genauso wie die Chat-Nachricht
+an alle Clients weitergeleitet, die an dem Chat teilnehmen.
+
+Wenn ein neuer Chat gestartet werden soll, schickt der Client die
+Nachricht:
+
+START_CHAT\r\n
+
+(0/ 1)\r\n (0 = privater, 1 = öffentlicher Chat)
+
+bei privatem Chat zusätzlich:
+
+(USER1_TO_INVITE)\r\n       //  (Benutzername)
+
+...
+
+(USERn_TO_INVITE)
+
+Der Server antwortet dann mit
+
+NEW_CHAT\r\n
+
+(CHAT_ID)\r\n
+
+(CHAT_OWNER)          // (nimmt schon am Chat teil)
+
+bei privatem Chat zusätzlich:
+
+(USER1_TO_INVITE)\r\n
+...
+(USERn_TO_INVITE)
+
+an alle eingeloggten Clients.
+
+
+Wenn ein Benutzer an einem Chat teilnehmen will, schickt sein Client
+
+JOIN_CHAT\r\n
+
+(CHAT_ID)
+
+an den Server.
+
+Wenn der Chat öffentlich ist, schickt der Server
+
+ACK, sonst ACCESS_DENIED.
+
+
+Wenn ein Benutzer einem Chat beitritt, dann schickt der Server an alle
+Benutzer des Chats (außer dem Benutzer, der neu hinzugekommen ist)
+die Nachricht
+
+CHAT_MEMBERS\r\n
+
+(CHAT_ID)\r\n
+
+(MEMBER1)\r\n
+
+...
+
+(MEMBERn)
+
+wobei die Beteiltigten Benutzer des Chats mit Benutzername aufgeführt werden.
+Jeder Client, der diese Nachricht erhält, fügt die Liste der Beteiligten
+Benutzer in seine grafische Ausgabe ein bzw. bringt diese auf den neuesten
+Stand. Gleiches gilt, wenn die Verbindung zu einem Client unterbrochen wird.
+
+Die Liste der Chatmitglieder kann vom Client auch explizit mit
+
+GET_CHAT_MEMBERS\r\n
+
+(CHAT_ID)
+ 
+angefordert werden.
+
+Wenn ein User einen Chat mit Usern aufmachen will, die die gleiche Website
+betrachten, schickt der Client zunächst die Nachricht
+
+GET_SAME_URL_VIEWERS
+
+an den Server.
+
+Der Server antwortet mit
+
+SAME_URL_VIEWERS\r\n
+
+(User1)\r\n
+...
+(Usern)\r\n
+
+an den Client, der die GET_SAME_URL_VIEWERS-Nachricht verschickt hat. Dieser
+Client kann dann über die obige Nachricht START_CHAT eine privaten Chat mit 
+den erhaltenen Usern beginnen.
+
+12. Profile
+=============================
+
+Möchte der Anwender sein Passwort ändern, schickt er
+
+SET_PASSWORD\r\n
+
+(PASSWORD)
+
+an den Server. Der Server antwortet mit ACK, wenn die Änderung
+erfolgreich war. Der ClientHash bleibt für die bestehende Verbindung
+erhalten.
+
+Möchte der Anwender sein Benutzerprofil verändern, schickt er
+
+SET_PROFILE\r\n
+
+(NAME)\r\n
+
+(SURNAME)\r\n
+
+(EMAIL)\r\n
+
+(PASSWORD)\r\n
+
+(LANGUAGE)\r\n
+
+(GENDER)\r\n
+
+(LOCATION)\r\n
+
+(COMMENTS)
+
+an den Server. Die Nachricht ist also bis auf den Benutzername die gleiche wie
+bei der Registrierung.
+
+Um sich das Profil von anderen Anwendern anzusehen, schickt der Anwender
+ 
+GET_PROFILE\r\n
+
+(USER1)\r\n
+
+(USER2)\r\n
+
+...
+
+(USERn)
+
+
+wobei USER der Benutzername des jeweiligen Anwenders ist. Der Server antwortet
+mit 
+
+PROFILE\r\n
+
+(NAME USER1)\r\n // Benutzername!
+
+(VORNAME)\r\n
+
+(NACHNAME)\r\n
+
+(EMAIL)\r\n
+
+(LANGUAGE)\r\n
+
+(GENDER)\r\n
+
+(LOCATION)\r\n
+
+(COMMENTS)
+
+-> Alle Registrierungsdaten des ersten Users bis auf das Passwort; durch \r\n getrennt
+
+(NAME USER2)\r\n
+
+...
+
+(NAME USERn)\r\n
+
+...
+
+
+Um nach einem Benutzer zu suchen, schickt der Client die Nachricht SEARCH_USERS an den
+Server. Diese sieht wie folgt aus:
+
+SEARCH_USERS\r\n
+
+(Benutzername)\r\n
+
+(Vorname)\r\n
+
+(Nachname)\r\n
+
+(Sprache)\r\n
+
+(Geschlecht)\r\n
+
+(Freitext)
+
+Der Server nimmt die Werte der Felder und sucht in seiner Benutzerdatenbank
+nach allen Benutzern, deren Felder die in der Nachricht angegebenen Teilstrings enthalten.
+Diese Suche lässt Groß- und Kleinschreibung unberücksichtigt. Das Feld "Freitext" wird mit
+allen anderen Textfeldern der Registrierungsdaten verglichen.
+
+Das Symbol "*" dient hier als Wildcard für eine beliebige Zeichenkette. Wird dieses
+Symbol in allen Feldern des SEARCH_USERS Paketes angegeben, dann gibt der Server alle
+registrierten Benutzer zurück.
+
+USERS\r\n
+
+(NAME USER1)\r\n // Benutzername!
+
+(VORNAME)\r\n
+
+(NACHNAME)\r\n
+
+(EMAIL)\r\n
+
+(LANGUAGE)\r\n
+
+(GENDER)\r\n
+
+(LOCATION)\r\n
+
+(COMMENTS)
+
+-> Alle Registrierungsdaten des ersten Users bis auf das Passwort; durch \r\n getrennt
+
+(NAME USER2)\r\n
+
+...
+
+(NAME USERn)\r\n
+
+...
+
+Wenn keine Benutzer gefunden wurden, dann ist die Liste der Benutzer einfach nur leer.
+Die Nachricht lautet dann einfach nur
+
+USERS
+
+Ansonsten werden wie gewohnt ACCESS_DENIED oder ERROR verschickt.
+
+
+13. URL-Verläufe
+
+Wenn ein Client eine neue Website besucht, dann schickt er an den Server die Nachricht
+
+VISITING\r\n
+
+(NEUE_URL)\r\n
+
+(TITEL_NEUE_URL)\r\n
+
+(ALTE_URL)
+
+Dabei ist NEUE_URL die URL der Seite, die der Benutzer neu angefordert hat und ALTE_URL
+die URL der Seite, bei der der entsprechende Link angeklickt wurde. Wenn der Benutzer
+selbst eine neue URL in das Adressfeld eingibt, dann bleibt der zweite Parameter leer,
+um dies zu kennzeichnen.
+
+TITEL_NEUE_URL ist der Titel der neuen Website.
+
+Das VISITING wird vom Client erst gesendet, nachdem er auch tatsächlich die Inhalte
+zur neuen URL erfolgreich abgerufen hat. Bei HTTP-Fehlern soll VISITING nicht
+verschickt werden um die Datenbank nicht mit fehlerhaften Links zu verseuchen.
+
+Der Server speichert diese Informationen permanent. Zusätzlich werden diese Nachrichten
+wie die von Chats an alle Beteiligten des Projektes weitergeleitet. Dabei ersetzt der Server
+den Hash des Clients durch den Benutzernamen.
+
+Wenn der Client eine Webseite besucht, deren URL nicht der zuletzt mit VISITING
+gesendeten URL entspricht, dann wird eine VIEWING-Nachricht an alle Teilnehmer,
+die das Projekt geöffnet haben, versendet. Die VIEWING-Nachricht ist für bestimmte
+Awareness-Funktionen und die FollowMe-Funktion von Bedeutung.
+
+VIEWING\r\n
+
+(URL)			(enthält nur die geladene URL)
+
+Wenn ein Client eine Webseite bewerten möchte, sendet er an den Server die Nachricht
+
+VOTING\r\n
+
+(URL)\r\n
+
+(VOTE)
+
+Dabei ist VOTE eine ganze Zahl von 0 bis 5, welche den vergebenen Punkten entspricht.
+Die ID des Projektes wird aus dem Kontext im Server gefolgert. 
+Die Information wird an alle Beteiligten des Projektes weitergeleitet.
+Der Anwender kann eine bereits abgegebenen Bewertung nachträglich ändern.
+
+Wenn ein Benutzer die anderen Benutzer über eine schicke Website informieren will, schickt
+er eine NOTIFY Nachricht. Diese sieht wie folgt aus:
+
+NOTIFY\n
+
+(URL)\n
+
+(TITEL)\n
+
+(Kommentar)\n
+
+(Länge Bilddaten)\n
+
+(Bilddaten)\n
+
+(User 1)\n
+
+...
+
+(User n)
+
+Eventuelle Zeilenumbrüche in den Bilddaten werden bei der Anzahl der Parameter
+der Nachricht nicht mitgezählt. Die Bilddaten werden Base64 codiert nach RFC 2045.
+Der zur Codierung verwendete Zeichensatz ist UTF-8. Die Länge der Bilddaten
+wird in Bytes angegeben. Für User 1 bis User n werden wie immer die
+Benutzernamen eingesetzt. Der Server verschickt an den Sendenden Client ein ACK,
+um mitzuteilen, dass die Nachricht werfolgreich empfangen wurde.
+
+Der Server verschickt an die Clients der angegebenen Benutzer die Nachricht
+
+NOTIFY\n
+
+(URL)\n
+
+(TITEL)\n
+
+(Kommentar)\n
+
+(Länge Bilddaten)\n
+
+(Bilddaten)
+
+
+Dabei wird der Bentzername des Absenders wie auch bei Chat-Nachrichten an der Stelle
+des Client-Hashs übetragen.
+
+
+Um alle in einem Projekt gesammelten URLs abzufragen, sendet der Client die Nachricht
+
+GET_WEBTRACE
+
+an den Server. Der Server schließt aus seinem Kontext das zugehörige Projekt,
+in dem der Client gerade aktiv ist. Der Server sucht dann die zu diesem Projekt
+die gesammelten URLs und sendet die Nachricht
+
+WEBTRACE\n
+
+(URL 1)\n
+
+...
+
+(URL n)
+
+als Antwort, wenn alles geklappt hat. Die URL-Daten bestehen dabei aus:
+
+(URL)\n
+
+(Parent-URL)\n
+
+(Titel)\n
+
+(Finder)\n
+
+(Bewertung)\n
+
+0/1    // 0=Kein Kommentar vorhanden, 1=Kommentar vorhanden
+
+Die Bewertung ist dabei ein einstelliger Integer oder -1, falls keine
+Bewertung abgegeben wurde. Dieser wird natürlich als String repräsentiert.
+
+Um Notizen zu einer Webseite hinzuzufügen, wird ein ADD_NOTE-Nachricht
+vom Client versendet. Der Server kennt das gerade geöffnete Projekt des
+Clients, daher hat die Nachricht den Aufbau:
+
+ADD_NOTE\r\n
+
+(URL)\r\n
+
+(Bewertung)\r\n		(erlaubte Werte wie bei GET_WEBTRACE)
+
+(TEXT)\r\n
+
+Wenn ein Anwender bereits eine Notiz im Server abgelegt hat, so wird die vorhandene
+Notiz  ersetzt. Analog werden bereits abgegebene Bewertungen behandelt.
+Der Server sendet ein NEW_NOTE an alle Clients, die das gleiche Projekt 
+geöffnet haben:
+
+NEW_NOTE\r\n
+
+(URL)\r\n
+
+(Bewertung)\r\n
+
+Wenn ein Client die gespeicherten Notizen zu einer URL abrufen möchte, sendet
+er 
+
+GET_NOTES\r\n
+
+(URL)
+
+an den Server. Der Server antwortet mit
+
+NOTES\r\n
+
+(notiz 1)\r\n
+
+(notiz 2)\r\n
+
+...
+
+(notiz n)
+
+Die Notiz-Daten bestehen aus 
+
+(Autor)\r\n
+
+(TEXT)
+
+
+
+14. Endergebnis/RATED_URLS
+
+Wenn das Fenster mit dem Endergebnis auf einem Client geöffnet wird, muß es mit Daten
+aus der DB-Table "ratings" gefüttert werden, die zum Projekt gehören. 
+Diese Table wiederum benötigt Daten aus den Tables "folders" und "url".
+
+Der Client fordert diese Daten folgendermaßen an:
+
+---------------------------------
+GET_FOLDERSYSTEM
+---------------------------------
+
+Die ProjektID kann der Server aus seinem Model beziehen, so dass sie nicht mehr mitgesendet
+werden muss.
+Der Server extrahiert aus "ratings" diejenigen Einträge mit der entsprechenden Projekt-ID
+und die dazugehörigen Daten aus "folders" und "url" (WHERE ratings.folder_id 
+= folders.folder_id und WHERE Ratings.url_id = url.url_id). 
+
+Zum Versenden gibt es dann drei Möglichkeiten: 
+1. Die Tabellen getrennt verschicken und vom Client zusammenpuzzeln lassen.
+2. Die Tabellen serverseitig zusammenpuzzeln und als eine einzige verschicken.
+3. Eine Mischform (z.B. nur URLs in Ratings einsetzen und Folders getrennt verschicken)
+Da die Beurteilung einer optimalen Lösung, um Server und Netzwerk entlasten,
+ohne entsprechende Benutzerdaten schwer fällt, wird vorläufig die dritte Version
+implementiert, wobei die Daten in einer Nachricht, die intern zweigeteilt ist, 
+versendet werden.
+
+----------------------------------
+FOLDERSYSTEM\r\n
+
+(ANZAHL_FOLDER_ZEILEN)\r\n
+(ANZAHL_FOLDER_URL_ZEILEN)\r\n
+
+(FOLDER_1)\r\n
+(FOLDER_2)\r\n
+...
+(FOLDER_n)\r\n
+
+(FOLDER_URL_1)\r\n
+(FOLDER_URL_2)\r\n
+...
+(FOLDER_URL_n)\r\n
+
+Die zugehörigen Daten entsprechen den Feldern aus den MySQL-Tabellen:
+
+Zu den Daten eines FOLDERS gehören:
+
+(FOLDER_ID)\r\n
+
+(FOLDER_NAME)\r\n
+
+(PARENT_FOLDER_ID)
+
+Wenn ein Folder keinen ParentFolder besitzt, wird als PARENT_FOLDER_ID
+0 versendet. Prinzipiell können mehrere Folder ohne ParentFolder 
+existieren.
+
+Die Daten einer FOLDER_URL sind die Paare von FolderID und URL, die in der Tabelle
+folder_urls gespeichert werden. Dabei wird die URL-ID durch die tatsächliche URL
+ersetzt:
+
+(FOLDER_ID)\r\n
+
+(URL)\r\n
+
+---------------------------------------
+
+Der Client erzeugt mit diesen Daten den Verzeichnisbaum und stellt ihn im 
+Ergebnisfenster dar. Jeder User, der den Ergebnisbaum aufruft, kann ihn
+verändern, d.h. URLs in andere Folder verschieben oder löschen (hinzufügen?).
+(Dabei ist noch zu entscheiden, ob er nur seine eigenen Links bearbeiten darf,
+um die synchrone Bearbeitung konfliktfreier zu gestalten. Auch könnte es verwirrend
+sein, wenn User ihre Links nicht mehr finden, weil sie jemand anderes verschoben
+hat).
+
+Wenn der Baum verändert wird, schickt der Client folgende Nachricht an den
+Server:
+
+---------------------------------------
+
+PARENTFOLDER_CHANGED\r\n
+
+(URL)\r\n
+
+(FOLDER_ID)
+
+Die URL ist dabei die Adresse einer Webseite (nicht die URL-ID).
+Je nach FolderID werden im Server verschiedene Operationen ausgeführt.
+
+Wenn die FolderID eine leere Zeile ist, hat die URL keinen Parentfolder mehr.
+(Sie muss also aus der Tabelle folder_urls gelöscht werden.)
+
+Wenn die FolderID zu einem existierenden Folder gehört, wird die Tabelle entsprechend
+angepasst. Sollte für die URL noch kein Eintrag in der Tabelle existieren, so
+muss der Eintrag neu erzeugt werden.
+
+Wenn man dem User erlaubt, auch Anmerkungen und Bewertungen im Ergebnisfenster
+noch nachzubearbeiten, was schon sehr praktisch wäre, dann kann der Client die
+Nachrichten aus Kapitel 13 benutzen:
+
+ADD_NOTE und VOTING
+
+
+-------------------------------------
+
+Diese Nachrichten veranlassen den Server, die entsprechenden Änderungen in der
+Datenbank vorzunehmen. Dann wird sie an alle Clients weitergereicht, die den gleichen
+Baum geladen haben.
+
+
+Um einen neues Verzeichnis anzulegen, wird folgende Nachricht benutzt:
+
+---------------------------------------
+NEW_FOLDER\r\n
+
+(FOLDER_NAME)\r\n
+
+(PARENT_FOLDER_ID)
+
+Wenn ein Folder gelöscht wird:
+
+DELETE_FOLDER\r\n
+
+(FOLDER_ID)
+
+Das Löschen eines Folders sollte der Client dem User nur gestatten, wenn er leer ist.
+Der Client sollte sonst eine Nachricht einblenden, dass der User alle Inhalte vorher
+verschieben (oder löschen) soll. 
+
+Zum Verschieben des Folders:
+
+MOVE_FOLDER\r\n
+
+(FOLDER_ID)\r\n
+
+(PARENT_FOLDER_ID)
+
+Beim Löschen und Verschieben von Foldern wird die Nachricht unverändert an alle 
+Projektteilnehmer, die ONLINE sind, versendet.
+
+Wenn ein Folder keinen ParentFolder besitzt, wird als PARENT_FOLDER_ID
+0 versendet. Prinzipiell können mehrere Folder ohne ParentFolder 
+existieren.
+-------------------------------------------
+
+Bei erfolgreicher Ausführung auf dem Server leitet dieser die Nachrichten an alle ins Projekt
+eingeloggten Clients weiter; bei der Nachricht NEW_FOLDER wird vom Server
+zusätzlich die FOLDER_ID des erzeugten Ordners eingefügt, also:
+
+NEW_FOLDER\r\n
+
+(FOLDER_ID)\r\n
+
+(FOLDER_NAME)\r\n
+
+(PARENT_FOLDER_ID)\r\n
+
+Alle anderen Nachrichten werden unverändert an die entsprechenden Clients
+weitergeleitet.
+
+
+15. TODO
+
+
+
+To be continued...
