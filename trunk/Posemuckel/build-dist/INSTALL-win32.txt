@@ -1,0 +1,10 @@
+The is nothing really to do for installing this software.
+Just run it using
+
+java -jar posemuckel-client-0.4.jar
+
+within this directory. If you feel uncomfortable with this,
+feel free to write a batch file or a really good installation
+script.
+
+the posemuckels

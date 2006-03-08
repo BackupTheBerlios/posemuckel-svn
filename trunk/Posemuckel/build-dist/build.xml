@@ -1,0 +1,240 @@
+<project name="Posemuckel Project" default="javadoc" basedir=".">
+    <description>
+        Build file for the Posemuckel Project.
+    </description>
+<!-- Globale Einstellungen -->
+<property name="compiled" location="../bin"/>
+
+<target name="linux" depends="client-bin-linux-tgz,javadoc"/>
+	
+<target name="javadoc">
+        <javadoc destdir="../doc/javadoc" 
+	        	packagenames="posemuckel.*"
+        		excludepackagenames="junit.*,lib.*"
+        		author="false"
+        		Windowtitle="Posemuckel Class Reference"
+				Private="true"
+        		Doctitle="Posemuckel Class Reference"
+        		bottom="All classes are licensed under GNU GPL."
+        		classpath="../lib/org.eclipse.core.runtime_3.1.1.jar;../lib/org.eclipse.jface_3.1.1.jar;../lib/org.eclipse.swt_3.1.0.jar;../lib/org.eclipse.swt.win32.win32.x86_3.1.1.jar;../lib/log4j-1.2.12.jar;../lib/commons-codec-1.3.jar;../lib/junit.jar;../lib/java-getopt-1.0.12.jar">
+		    <fileset dir="../src/posemuckel" includes="**/*.java"/>
+        </javadoc>
+</target>
+	
+<!--
+Erzeugt ein JAR vom Client speziell für Linux.
+-->
+<target name="client-linux" description="generate the client distribution" >
+	<!-- Erzeuge eine JAR-Datei für den Server -->
+	<jar jarfile="../dist/posemuckel-client-0.4.jar">
+    	<fileset dir="../bin">
+    		<exclude name="posemuckel/server/**"/>
+    		<exclude name="**/*Test*"/>
+    		<include name="**/*.class"/>
+    		<include name="**/*.gif"/>
+    		<include name="**/*.bmp"/>
+    		<include name="**/*.jpg"/>
+    		<include name="**/*.properties"/>
+    	</fileset>
+		<fileset dir="." includes="LICENSE.txt"/>
+		<fileset dir="." includes="AUTHORS.txt"/>
+		<manifest>
+		 <attribute name="Built-By" value="Posemuckel Project Team"/>
+		 <attribute name="Main-Class" value="posemuckel/client/net/Client"/>
+		 <!--attribute name="Class-Path" value="lib\log4j-1.2.12.jar lib\org.eclipse.swt_3.1.0.jar lib\org.eclipse.swt.win32.win32.x86_3.1.1.jar lib\org.eclipse.jface_3.1.1.jar lib\org.eclipse.core.runtime_3.1.1.jar lib\commons-codec-1.3.jar"/-->
+		 <attribute name="Class-Path" value="lib/log4j-1.2.12.jar lib/org.eclipse.swt_3.1.0.jar lib/org.eclipse.swt.gtk.linux.x86_3.1.1.jar lib/org.eclipse.jface_3.1.1.jar lib/org.eclipse.core.runtime_3.1.1.jar lib/commons-codec-1.3.jar"/>
+		</manifest>
+	</jar>
+</target>
+
+	
+<!--
+Erzeugt ein JAR vom Client speziell für Windows.
+-->
+<target name="client-win32" description="generate the client distribution" >
+	<!-- Erzeuge eine JAR-Datei für den Server -->
+	<jar jarfile="../dist/posemuckel-client-0.4.jar">
+    	<fileset dir="../bin">
+    		<exclude name="posemuckel/server/**"/>
+    		<exclude name="**/*Test*"/>
+    		<include name="**/*.class"/>
+    		<include name="**/*.gif"/>
+    		<include name="**/*.bmp"/>
+    		<include name="**/*.jpg"/>
+    		<include name="**/*.properties"/>
+    	</fileset>
+		<fileset dir="." includes="LICENSE.txt"/>	
+		<fileset dir="." includes="AUTHORS.txt"/>
+		<manifest>
+		 <attribute name="Built-By" value="Posemuckel Project Team"/>
+		 <attribute name="Main-Class" value="posemuckel/client/net/Client"/>
+		 <attribute name="Class-Path" value="lib\log4j-1.2.12.jar lib\org.eclipse.swt_3.1.0.jar lib\org.eclipse.swt.win32.win32.x86_3.1.1.jar lib\org.eclipse.jface_3.1.1.jar lib\org.eclipse.core.runtime_3.1.1.jar lib\commons-codec-1.3.jar"/>
+		</manifest>
+	</jar>
+</target>	
+	
+<target name="client-bin-win32-zip" depends="client-win32" description="generate the client distribution" >
+		<delete file="../dist/posemuckel-client-bin-win32-0.4.zip"/>
+		<!-- Erzeuge eine Zip-Datei mit dem Client drin -->
+		<zip destfile="../dist/posemuckel-client-bin-win32-0.4.zip">
+			<zipfileset dir="." includes="LICENSE.txt" prefix="posemuckel-client-bin-0.4"/>
+			<zipfileset dir="." includes="AUTHORS.txt" prefix="posemuckel-client-bin-0.4"/>
+			<zipfileset dir="." includes="INSTALL-win32.txt" fullpath="posemuckel-client-bin-0.4/INSTALL.txt"/>
+			<zipfileset dir="../dist" includes="posemuckel-client-0.4.jar" prefix="posemuckel-client-bin-0.4"/>
+			<!-- Das lib-Verzeichnis befüllen -->
+			<zipfileset dir="../lib" includes="log4j-1.2.12.jar" prefix="posemuckel-client-bin-0.4/lib"/>
+			<zipfileset dir="../lib" includes="commons-codec-1.3.jar" prefix="posemuckel-client-bin-0.4/lib"/>
+			<zipfileset dir="../lib" includes="org.eclipse.core.runtime_3.1.1.jar" prefix="posemuckel-client-bin-0.4/lib"/>
+			<zipfileset dir="../lib" includes="org.eclipse.jface_3.1.1.jar" prefix="posemuckel-client-bin-0.4/lib"/>
+			<zipfileset dir="../lib" includes="org.eclipse.swt_3.1.0.jar" prefix="posemuckel-client-bin-0.4/lib"/>
+			<zipfileset dir="../lib" includes="org.eclipse.swt.win32.win32.x86_3.1.1.jar" prefix="posemuckel-client-bin-0.4/lib"/>
+			<zipfileset dir="../lib" includes="**/*.dll" prefix="posemuckel-client-bin-0.4/lib"/>
+			<zipfileset dir="." includes="..\lib\3RD-PARTY-LICENSES.txt" prefix="posemuckel-client-bin-0.4/lib"/>
+			<zipfileset dir="." includes="..\lib\Apache-License.txt" prefix="posemuckel-client-bin-0.4/lib"/>
+			<zipfileset dir="." includes="..\lib\Eclipse-Public-License.txt" prefix="posemuckel-client-bin-0.4/lib"/>
+			<zipfileset dir="." includes="..\lib\Common-Public-License.txt" prefix="posemuckel-client-bin-0.4/lib"/>
+			<!-- Das doc-Verzeichnis befüllen -->
+			<zipfileset dir="../doc/userdoc" includes="**/*.htm" prefix="posemuckel-client-bin-0.4/doc/userdoc"/>
+			<zipfileset dir="../doc/userdoc/Images" includes="**/*.jpg" prefix="posemuckel-client-bin-0.4/doc/userdoc/Images"/>
+		</zip>
+		<delete file="../dist/posemuckel-client-0.4.jar"/>
+</target>
+	
+	
+<!--Client-
+Das nachfolgende Target erzeugt ein mit Gzip komprimiertes Tar-Archiv.
+Dieses Target läuft nur unter Linux!
+
+Zunächst wird aber erstmal ein JAR speziell für Linux erszeugt.
+Dafür sorgt die Abhängigkeit dieses Targets.
+
+Das läuft hier so ab:
+1. erzeuge aus der vorhandenen configure.ac ein configure-script
+2. lösche das alte tgz-Archiv
+3. stelle erstmal ein tar-Archiv zusammen
+4. komprimiere das tar
+5. lösche überflüssige Dateien, damit von diesem Prozess nur das tgz übrig bleibt
+-->
+<target name="client-bin-linux-tgz" depends="client-linux" description="generate the client distribution" >
+		<!-- Erzeuge ein configure-Script -->
+		<exec dir="./" executable="autoconf">
+		</exec>
+ 		<delete file="../dist/posemuckel-client-bin-linux-0.4.tgz"/>
+		<!-- Erzeuge eine Tar-Gzip-Datei mit dem Client drin -->
+		<tar destfile="../dist/posemuckel-client-bin-linux-0.4.tar">
+			<tarfileset dir="." includes="LICENSE.txt" prefix="posemuckel-client-bin-0.4"/>
+			<tarfileset dir="." includes="AUTHORS.txt" prefix="posemuckel-client-bin-0.4"/>
+			<tarfileset dir="." includes="README.txt" prefix="posemuckel-client-bin-0.4"/>
+			<tarfileset dir="." includes="posemuckel.in" prefix="posemuckel-client-bin-0.4"/>
+			<tarfileset dir="." includes="configure" mode="755" prefix="posemuckel-client-bin-0.4"/>
+			<tarfileset dir="." includes="INSTALL-Linux.txt" fullpath="posemuckel-client-bin-0.4/INSTALL.txt"/>
+			<tarfileset dir="../dist" includes="posemuckel-client-0.4.jar" prefix="posemuckel-client-bin-0.4"/>
+			<!-- Das lib-Verzeichnis befüllen -->
+			<tarfileset dir="../lib" includes="log4j-1.2.12.jar" prefix="posemuckel-client-bin-0.4/lib"/>
+			<tarfileset dir="../lib" includes="commons-codec-1.3.jar" prefix="posemuckel-client-bin-0.4/lib"/>
+			<tarfileset dir="../lib" includes="org.eclipse.core.runtime_3.1.1.jar" prefix="posemuckel-client-bin-0.4/lib"/>
+			<tarfileset dir="../lib" includes="org.eclipse.jface_3.1.1.jar" prefix="posemuckel-client-bin-0.4/lib"/>
+			<tarfileset dir="../lib" includes="org.eclipse.swt_3.1.0.jar" prefix="posemuckel-client-bin-0.4/lib"/>
+			<tarfileset dir="../lib" includes="org.eclipse.swt.gtk.linux.x86_3.1.1.jar" prefix="posemuckel-client-bin-0.4/lib"/>
+			<tarfileset dir="../lib" includes="**/*.so" prefix="posemuckel-client-bin-0.4/lib"/>
+			<tarfileset dir="../lib" includes="3RD-PARTY-LICENSES.txt" prefix="posemuckel-client-bin-0.4/lib"/>
+			<tarfileset dir="../lib" includes="Apache-License.txt" prefix="posemuckel-client-bin-0.4/lib"/>
+			<tarfileset dir="../lib" includes="Eclipse-Public-License.txt" prefix="posemuckel-client-bin-0.4/lib"/>
+			<tarfileset dir="../lib" includes="Common-Public-License.txt" prefix="posemuckel-client-bin-0.4/lib"/>
+			<!-- Das doc-Verzeichnis befüllen -->
+			<tarfileset dir="../doc/userdoc" includes="**/*.htm" prefix="posemuckel-client-bin-0.4/doc/userdoc"/>
+			<tarfileset dir="../doc/userdoc/Images" includes="**/*.jpg" prefix="posemuckel-client-bin-0.4/doc/userdoc/Images"/>
+		</tar>
+		<gzip src="../dist/posemuckel-client-bin-linux-0.4.tar" destfile="../dist/posemuckel-client-bin-linux-0.4.tgz"/>
+	 	<delete file="../dist/posemuckel-client-bin-linux-0.4.tar"/>
+		<delete dir="autom4te.cache"/>
+		<delete file="configure"/>
+		<delete file="../dist/posemuckel-client-0.4.jar"/>
+</target>	
+	
+
+<target name="sources-zip" description="generate the source zip" >
+			<delete file="../dist/posemuckel-sources-0.4.zip"/>
+			<!-- Erzeuge eine Zip-Datei mit dem Client drin -->
+			<zip destfile="../dist/posemuckel-sources-0.4.zip">
+				<zipfileset dir="." includes="LICENSE.txt" prefix="posemuckel-sources-0.4"/>
+				<zipfileset dir="." includes="AUTHORS.txt" prefix="posemuckel-sources-0.4"/>
+				<zipfileset dir="." includes="README.txt" prefix="posemuckel-sources-0.4"/>
+				<!-- Das src-Verzeichnis befüllen -->
+				<zipfileset dir="../src/posemuckel" includes="**/*.java" prefix="posemuckel-sources-0.4/src/posemuckel"/>
+				<zipfileset dir="../src/posemuckel" includes="**/*.jpg" prefix="posemuckel-sources-0.4/src/posemuckel"/>
+				<zipfileset dir="../src/posemuckel" includes="**/*.gif" prefix="posemuckel-sources-0.4/src/posemuckel"/>
+				<zipfileset dir="../src/posemuckel" includes="**/*.bmp" prefix="posemuckel-sources-0.4/src/posemuckel"/>
+				<zipfileset dir="../src/posemuckel" includes="**/*.fatjar" prefix="posemuckel-sources-0.4/src/posemuckel"/>
+				<zipfileset dir="../src/posemuckel" includes="**/*.properties" prefix="posemuckel-sources-0.4/src/posemuckel"/>
+				<zipfileset dir="../src/lib" includes="**/*.java" prefix="posemuckel-sources-0.4/src/lib"/>
+				<!-- Das server-Verzeichnis befüllen -->
+				<zipfileset dir="../server" includes="**/*.php" prefix="posemuckel-sources-0.4/server"/>
+				<zipfileset dir="../server" includes="**/*.tpl" prefix="posemuckel-sources-0.4/server"/>
+				<zipfileset dir="../server" includes="**/*.png" prefix="posemuckel-sources-0.4/server"/>
+				<zipfileset dir="../server" includes="**/*.gif" prefix="posemuckel-sources-0.4/server"/>
+				<zipfileset dir="../server" includes="**/*.jpg" prefix="posemuckel-sources-0.4/server"/>
+				<zipfileset dir="../server/conf" includes="**/*.*" prefix="posemuckel-sources-0.4/server"/>
+				<zipfileset file="../server/www/lib/LICENSE.txt" prefix="posemuckel-sources-0.4/server/www/lib"/>
+				<zipfileset file="../server/db.sql" prefix="posemuckel-sources-0.4/server"/>
+				<zipfileset file="../server/db_test.sql" prefix="posemuckel-sources-0.4/server"/>
+			</zip>
+</target>	
+	
+	
+<!--target name="server" description="generate the server jar" -->
+		<!-- Erzeuge eine JAR-Datei für den Server -->
+		<!--jar jarfile="../dist/posemuckel-server-0.4.jar">
+	    	<fileset dir="../bin">
+	    		<exclude name="posemuckel/client/**"/>
+	    		<exclude name="**/*Test*"/>
+	    		<include name="**/*.class"/>
+	    		<include name="**/*.properties"/>
+	    	</fileset>
+			<fileset dir="." includes="LICENSE.txt"/>
+			<fileset dir="." includes="AUTHORS.txt"/>
+			<manifest>
+			 <attribute name="Built-By" value="Posemuckel Project Team"/>
+			 <attribute name="Main-Class" value="posemuckel/server/Server"/>
+			 <attribute name="Class-Path" value="lib/log4j-1.2.12.jar lib/mysql-connector-java-3.1.11-bin.jar lib/java-getopt-1.0.12.jar"/>
+			</manifest>
+		</jar>
+</target-->
+	
+<!--Server-
+Das nachfolgende Target erzeugt ein mit Gzip komprimiertes Tar-Archiv.
+Dieses Target läuft nur unter Linux!
+
+Zunächst wird aber erstmal ein JAR speziell für Linux erszeugt.
+Dafür sorgt die Abhängigkeit dieses Targets.
+
+Das läuft hier so ab:
+2. lösche das alte tgz-Archiv
+3. stelle erstmal ein tar-Archiv zusammen
+4. komprimiere das tar
+5. lösche überflüssige Dateien, damit von diesem Prozess nur das tgz übrig bleibt
+-->
+<!--target name="server-bin-tgz" depends="server" description="generate the server linux distribution" >
+ 		<delete file="../dist/posemuckel-server-bin-0.4.tgz"/-->
+		<!-- Erzeuge eine Tar-Gzip-Datei mit dem Client drin -->
+		<!--tar destfile="../dist/posemuckel-server-bin-0.4.tar">
+			<tarfileset dir="." includes="LICENSE.txt" prefix="posemuckel-server-bin-0.4"/>
+			<tarfileset dir="." includes="AUTHORS.txt" prefix="posemuckel-server-bin-0.4"/>
+			<tarfileset dir="../dist" includes="posemuckel-server-0.4.jar" prefix="posemuckel-server-bin-0.4"/-->
+			<!-- Das lib-Verzeichnis befüllen -->
+			<!--tarfileset dir="../lib" includes="log4j-1.2.12.jar" prefix="posemuckel-server-bin-0.4/lib"/>
+			<tarfileset dir="../lib" includes="java-getopt-1.0.12.jar" prefix="posemuckel-server-bin-0.4/lib"/>
+			<tarfileset dir="../lib" includes="mysql-connector-java-3.1.11-bin.jar" prefix="posemuckel-server-bin-0.4/lib"/>				
+			<tarfileset dir="../lib" includes="3RD-PARTY-LICENSES.txt" prefix="posemuckel-client-bin-0.4/lib"/>
+			<tarfileset dir="../lib" includes="Apache-License.txt" prefix="posemuckel-client-bin-0.4/lib"/>
+			<tarfileset dir="../lib" includes="Common-Public-License.txt" prefix="posemuckel-client-bin-0.4/lib"/-->
+			<!-- Das doc-Verzeichnis befüllen -->
+			<!--tarfileset dir="../doc" includes="" prefix="posemuckel-client-bin-0.4/doc"/-->
+		<!--/tar>
+		<gzip src="../dist/posemuckel-server-bin-0.4.tar" destfile="../dist/posemuckel-server-bin-0.4.tgz"/>
+	 	<delete file="../dist/posemuckel-server-bin-0.4.tar"/>
+		<delete file="../dist/posemuckel-server-0.4.jar"/>
+</target-->	
+
+	
+</project>

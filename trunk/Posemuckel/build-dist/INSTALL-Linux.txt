@@ -1,0 +1,23 @@
+1. Try this
+
+Run the configure script in this directory:
+
+./configure
+
+It will figure out, if all applications needed
+are installed and set some paths in a file called
+"posemuckel" that is to be created. If this
+succeeds, you can run the posemuckel client with
+
+./posemuckel
+
+in this directory or from any other directory on
+your system. You can even move this file into your
+path as long you do not move this directory you
+unpacked from the tgz distribution.
+
+2. If it does not work...
+
+...then your Linux distribution might not have
+been tested yet. Please contect us via mail:
+papa_pasta@users.berlios.de
