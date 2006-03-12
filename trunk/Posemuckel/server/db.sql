@@ -112,7 +112,7 @@ CREATE TABLE `posemuckel`.`projects` (
     REFERENCES `posemuckel`.`chat` (`chat_id`) ON DELETE CASCADE
 );
 
-CREATE TABLE `posemuckel`.`project_invitedUser` (
+CREATE TABLE `posemuckel`.`project_inviteduser` (
   `project_id` INT(20) UNSIGNED NOT NULL,
   `invited_user` VARCHAR(20) NOT NULL,
   `invitation_confirm` BOOLEAN NULL,
