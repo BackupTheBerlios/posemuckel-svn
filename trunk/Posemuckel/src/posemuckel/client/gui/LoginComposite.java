@@ -100,6 +100,7 @@ public class LoginComposite extends Composite implements TabContent {
 		data.horizontalSpan=1;
 		text_username.setLayoutData(data);
 		text_username.setBackground(parent.getBackground());
+		text_username.setTextLimit(20);
 		
 		label_passwd = new Label(this, SWT.SHADOW_NONE);
 		label_passwd.setText(passwd + ":");
@@ -113,6 +114,7 @@ public class LoginComposite extends Composite implements TabContent {
 		data.horizontalSpan=1;
 		text_passwd.setLayoutData(data);
 		text_passwd.setBackground(parent.getBackground());
+		text_passwd.setTextLimit(20);
 		
 		checkbox_save = new Button(this, SWT.CHECK);
 		checkbox_save.setText("Passwort lokal speichern");
