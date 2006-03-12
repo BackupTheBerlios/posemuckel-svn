@@ -386,7 +386,7 @@ public class DB {
 	
 	/**
 	 * Hilfsmethode, die die zu einem Projekt eingeladenen Benutzer in die
-	 * Tabelle project_invitedUser der Datenbank einträgt.
+	 * Tabelle project_inviteduser der Datenbank einträgt.
 	 * @param projectID Projekt-ID des Projektes, zu dem die Benutzer ein-
 	 * geladen werden
 	 * @param userToInvite enthält die Benutzer, die eingeladen werden 
@@ -395,7 +395,7 @@ public class DB {
 	 */
 	private void insertInvitedUsers(int projectID, String[] userToInvite) throws SQLException {
 		for ( String user : userToInvite ) {
-			statement.executeUpdate("INSERT INTO project_invitedUser "+
+			statement.executeUpdate("INSERT INTO project_inviteduser "+
 					"SET project_id='"+projectID+"', invited_user='"+
 					user+"', " +
 					"invitation_confirm='0', invitation_answered='0';");
@@ -610,7 +610,7 @@ public class DB {
 				dbupdate = statement.executeUpdate("UPDATE projects SET "+
 						"count_members='"+(count+1)+"' "+
 						"WHERE project_id='"+projectID+"';");
-				statement.executeUpdate("UPDATE project_invitedUser "+
+				statement.executeUpdate("UPDATE project_inviteduser "+
     					"SET invitation_confirm='0', invitation_answered='0'" +
     					"WHERE project_id='"+projectID+"' AND invited_user='"+
     					user+"';");
@@ -658,7 +658,7 @@ public class DB {
 	public boolean isInvited(String user, String projectID) throws SQLException {
 		boolean b = true;
 		dbresult = statement.executeQuery("SELECT * FROM "+
-				"project_invitedUser WHERE project_id='"+projectID+
+				"project_inviteduser WHERE project_id='"+projectID+
 				"' AND invited_user='"+user+"';");
 		if (!dbresult.next()) {
 			b = false;
@@ -668,7 +668,7 @@ public class DB {
 	}
 	
 	/**
-	 * Aktualisiert die Tabelle project_invitedUser als Antwort, ob eine
+	 * Aktualisiert die Tabelle project_inviteduser als Antwort, ob eine
 	 * Einladung angenommen wurde, oder nicht.
 	 * @param user Benutzer
 	 * @param projectID Projekt-ID des Projektes
@@ -678,7 +678,7 @@ public class DB {
 	 */
 	public void answerInvitation(String user, String projectID, boolean accept) throws SQLException {
 		String s = accept ? "1" : "0";
-		statement.executeUpdate("UPDATE project_invitedUser "+
+		statement.executeUpdate("UPDATE project_inviteduser "+
 				"SET invitation_confirm='" + s + "', invitation_answered='1'" +
 				"WHERE project_id='"+projectID+"' AND invited_user='"+
 				user+"';");	
@@ -695,7 +695,7 @@ public class DB {
 	public boolean hasAccepted(String user, String projectID) throws SQLException {
 		boolean b = true;
 		dbresult = statement.executeQuery("SELECT invitation_confirm, invitation_answered " +
-				"FROM project_invitedUser WHERE project_id='"+projectID+
+				"FROM project_inviteduser WHERE project_id='"+projectID+
 				"' AND invited_user='"+user+"';");
 		if (!dbresult.next()) {
 			b = false;
@@ -850,7 +850,7 @@ public class DB {
 	public Vector getInvitations(String user) throws SQLException {
 		Vector<String> projects = new Vector<String>();
 		dbresult = statement.executeQuery("SELECT * FROM projects WHERE "+
-				"project_id IN (SELECT project_id FROM project_invitedUser WHERE "+
+				"project_id IN (SELECT project_id FROM project_inviteduser WHERE "+
 				"invited_user='"+user+"' AND invitation_answered='0');");
 		fillProjectVector(projects, dbresult);
 		connection.commit();
@@ -938,7 +938,7 @@ public class DB {
 	protected boolean hasAnsweredInvitation(String projectID, String user) throws SQLException {
 		boolean b = true;
 		dbresult = statement.executeQuery("SELECT invitation_answered FROM "+
-				"project_invitedUser WHERE project_id='"+projectID+
+				"project_inviteduser WHERE project_id='"+projectID+
 				"' AND invited_user='"+user+"';");
 		if (!dbresult.next()) {
 			b = false;
