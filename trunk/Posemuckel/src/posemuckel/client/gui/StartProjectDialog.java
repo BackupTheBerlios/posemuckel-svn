@@ -338,6 +338,7 @@ public class StartProjectDialog extends Dialog {
 	            mb.setText(input_error);
 	            mb.setMessage(give_me_a_topic);
 	            mb.open();
+	            active = true;
 				return;
 			}
 			if ( max_users.equals("") ) {
@@ -345,6 +346,7 @@ public class StartProjectDialog extends Dialog {
 	            mb.setText(input_error);
 	            mb.setMessage(give_me_maxusers);
 	            mb.open();
+	            active = true;
 				return;
 			}
 			if ( description.equals("") ) {
@@ -352,6 +354,7 @@ public class StartProjectDialog extends Dialog {
 	            mb.setText(input_error);
 	            mb.setMessage(give_me_a_description);
 	            mb.open();
+	            active = true;
 				return;
 			}
 			
