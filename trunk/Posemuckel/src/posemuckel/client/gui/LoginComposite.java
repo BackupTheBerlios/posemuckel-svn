@@ -114,15 +114,6 @@ public class LoginComposite extends Composite implements TabContent {
 		text_passwd.setLayoutData(data);
 		text_passwd.setBackground(parent.getBackground());
 		
-		text_passwd.addTraverseListener(new TraverseListener() {
-			public void keyTraversed(TraverseEvent e) {
-				//der Focus springt zwischen username und passwort Feld hin und her
-				e.doit = false;
-				text_username.setFocus();
-			}
-			
-		});
-
 		checkbox_save = new Button(this, SWT.CHECK);
 		checkbox_save.setText("Passwort lokal speichern");
 		data = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
