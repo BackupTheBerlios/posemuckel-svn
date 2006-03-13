@@ -514,6 +514,7 @@ public class ClientMessage extends Message_Handler {
     		if (chatID.equals(EnumsAndConstants.LOG_CHAT_ID)) {
     			log(hash, id, text);
     		} else {
+    			if (clientInfo.getCurrentProject() != null)
     			data.addText(text, user, chatID, 
     					clientInfo.getCurrentProject().getProjectID());
     			servermess.chat(model.chatmembers(chatID),user,id,chatID,text);
