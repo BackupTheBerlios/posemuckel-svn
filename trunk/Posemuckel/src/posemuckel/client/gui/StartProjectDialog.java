@@ -55,6 +55,7 @@ public class StartProjectDialog extends Dialog {
 	private Label label_topic;
 	private Text text_topic;
 	private Button checkbox_public;
+	private Button checkbox_participate;
 	private Label label_maxusers;
 	private Combo combo_maxusers;
 	private Label label_description;
@@ -63,6 +64,7 @@ public class StartProjectDialog extends Dialog {
 	private String title;
 	private String topic;
 	private String isprivate;
+	private String participate;
 	private String description;
 	private String buddies;
 	private String inviters;
@@ -122,7 +124,8 @@ public class StartProjectDialog extends Dialog {
 		data.horizontalSpan = 1;
 		label_buddies.setLayoutData(data);
 		
-		@SuppressWarnings("unused") Label do_not_delete = new Label(comp, SWT.SHADOW_NONE);
+		//Label do_not_delete = //das ist ein Platzhalter!
+		new Label(comp, SWT.SHADOW_NONE);
 		
 		label_invited = new Label(comp, SWT.SHADOW_NONE);
 		label_invited.setText(inviters+":");
@@ -133,7 +136,7 @@ public class StartProjectDialog extends Dialog {
 		checkbox_public = new Button(comp, SWT.CHECK);
 		checkbox_public.setText(isprivate);
 		data = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
-		data.horizontalSpan = 3;
+		data.horizontalSpan = 1;
 		checkbox_public.setLayoutData(data);
 		checkbox_public.addSelectionListener(
 				// da bei privaten Projekten die MaxUser ignoriert werden,
@@ -147,6 +150,12 @@ public class StartProjectDialog extends Dialog {
 				}
 		);
 		
+		checkbox_participate = new Button(comp, SWT.CHECK);
+		checkbox_participate.setText(participate);
+		data = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
+		data.horizontalSpan = 2;
+		checkbox_participate.setLayoutData(data);
+
 		BuddyList = new List(comp, SWT.BORDER |SWT.V_SCROLL | SWT.FULL_SELECTION | SWT.MULTI);
 		data = new GridData(GridData.FILL_BOTH);
 		data.heightHint = 200;
@@ -280,6 +289,7 @@ public class StartProjectDialog extends Dialog {
 		title  = GetText.gettext("NEW_PROJECT");
 		topic  = GetText.gettext("START_PROJECT_TOPIC");
 		isprivate  = GetText.gettext("PRIVATE");
+		participate = GetText.gettext("PARTICIPATE");
 		description = GetText.gettext("PROJECT_DESCRIPTION");
 		buddies = GetText.gettext("BUDDIES_NOT_TO_INVITE");
 		inviters = GetText.gettext("INVITE_BUDDIES");
@@ -310,13 +320,16 @@ public class StartProjectDialog extends Dialog {
 			
 			addListener();
 			String project_topic = text_topic.getText();
+			if(checkbox_participate.getSelection()) {
+				addAutoJoinListener(project_topic);
+			}
 			String max_users = combo_maxusers.getText();
 			String description = text_description.getText();
 			// TODO Lieber Zeilenumbrüche zulassen (Änderung des RFC)			
 			description = GetText.replaceRN(description);
 			boolean isprivate = checkbox_public.getSelection();
 			int max = Integer.valueOf(combo_maxusers.getText());
-			System.out.println("1. max = " + max);
+//			System.out.println("1. max = " + max);
 			int free = max;
 			String ispublic;
 			if(isprivate) {
@@ -324,13 +337,13 @@ public class StartProjectDialog extends Dialog {
 				//TODO
 				//die Anzahl ist nicht variabel, oder?
 				max = InvitedList.getItemCount() + 1;
-				System.out.println("2. max = " + max);
+				//System.out.println("2. max = " + max);
 				free = 0;
 			} else {
 				ispublic = Project.PUBLIC_TYPE;
 				//die Anzahl der Anwender nach oben verschieben
 				max = (max >= (InvitedList.getItemCount() + 1) ? max : (InvitedList.getItemCount() + 1));
-				System.out.println("2. max = " + max);
+				//System.out.println("2. max = " + max);
 				free = max - (InvitedList.getItemCount() + 1);
 			}
 			if ( project_topic.equals("") ) {
@@ -390,6 +403,7 @@ public class StartProjectDialog extends Dialog {
 				if(isDisposed()) {
 					//TODO wieso kann der User einen ProjectListener erhalten???
 					//user.removeListener(listener);
+					Model.getModel().getAllProjects().removeListener(listener);
 				} else {
 					Display.getDefault().asyncExec(run);
 				}				
@@ -400,6 +414,7 @@ public class StartProjectDialog extends Dialog {
 					public void run() {
 						if (event.isSucceeded()) {
 							// funktioniert nicht: event.getProjectSource().join();
+							// da die Project-ID im Client noch nicht bekannt ist
 							result.setText(success);
 						}
 						else {
@@ -417,6 +432,7 @@ public class StartProjectDialog extends Dialog {
 				if(isDisposed()) {
 					//TODO user hat keine ProjectListener
 					//user.removeListener(listener);
+					Model.getModel().getAllProjects().removeListener(listener);
 				} else {
 					Display.getDefault().asyncExec(run);
 				}
@@ -435,5 +451,29 @@ public class StartProjectDialog extends Dialog {
 	private boolean isDisposed() {
 		return (getShell() == null) || this.getShell().isDisposed();
 	}
+	
+	/**
+	 * Führt für den Owner des Projektes ein automatisches Join aus, falls die
+	 * entsprechende CheckBox aktiviert wurde. Das Projekt wird anhand des Topics
+	 * und des Owners identifiziert, da die ID beim Anlegen des Projektes nicht
+	 * bekannt ist.
+	 * @param topic des Projektes
+	 */
+	private void addAutoJoinListener(final String topic) {
+		Model.getModel().getAllProjects().addListener(new ProjectListenerAdapter() {
+
+			@Override
+			public void newProject(ProjectEvent event) {
+				Project project = event.getProjectSource();
+				if(project.getTopic().equals(topic) &&
+						project.getOwner().equals(Model.getModel().getUser().getNickname())) {
+					event.getProjectSource().join();
+					Model.getModel().getAllProjects().removeListener(this);
+				}
+			}
+			
+		});
+	}
+	
 	
 }
