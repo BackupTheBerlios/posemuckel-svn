@@ -123,6 +123,10 @@ public class WebtraceTable extends Composite {
 		return listener;
 	}
 	
+	protected RatingTable getRatingTable() {
+		return singleRating;
+	}
+	
 	/**
 	 * Stattet die Tabelle mit einem Filter aus, so dass nur Webseiten mit einer
 	 * Durchschnittswertung von mindestens 3 Punkten angezeigt werden.

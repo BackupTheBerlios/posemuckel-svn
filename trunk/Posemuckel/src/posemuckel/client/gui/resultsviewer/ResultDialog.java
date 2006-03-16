@@ -27,7 +27,6 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
 
@@ -45,11 +44,11 @@ import posemuckel.common.GetText;
 
 public class ResultDialog extends Dialog {
 
-	private Text text_selection;
 	private TreeViewer resultsViewer;
 	private ResultsViewerLabelProvider labelProvider;
 	public static final int RATING = 100;
 	private Model model;
+	private RatingTable singleRating;
 	
 	public ResultDialog(Shell shell) {
 		super(shell);
@@ -67,31 +66,19 @@ public class ResultDialog extends Dialog {
 		//layout.marginHeight = 2;
 		comp.setLayout(layout);
 		GridData layoutData = new GridData();
-
-		// ein read-only Textfeld zur Anzeige der Anmerkungen -> Select & Copy möglich
-		/* funzt irgendwie nicht richtig, daher erst mal deaktiviert
-		 * Davon abgesehen sollten Bewertungne und Kommentare idealerweise 
-		 * in den gleichen Feldern wie die der Tabelle eingeblendet werden
-		 */
-		//text_selection = new Text(comp, SWT.READ_ONLY | SWT.BORDER);
-		//layoutData.horizontalSpan = 1;
-		//layoutData.grabExcessHorizontalSpace = true;
-		//layoutData.horizontalAlignment = GridData.FILL;
-		//text_selection.setLayoutData(layoutData);
-
 		// Create the tree viewer as a child of the composite comp
 		SashForm sash = new SashForm(comp, SWT.HORIZONTAL);
 		layoutData = new GridData(SWT.FILL, SWT.FILL, true, true);
 		layoutData.minimumHeight=500;
 		layoutData.minimumWidth=800;
 		sash.setLayoutData(layoutData);
-		addTable(sash);
+		singleRating = addTable(sash);
 		resultsViewer = new TreeViewer(sash);
 		resultsViewer.setContentProvider(new ResultsViewerContentProvider());
 		//labelProvider = new ResultsViewerLabelProvider();
 		labelProvider = new ResultsViewerLabelProvider(TreeIcons.getIcons());
 		resultsViewer.setLabelProvider(labelProvider);
-		
+		addListeners();
 		resultsViewer.setUseHashlookup(true);
 		
 		// layout the tree viewer
@@ -121,15 +108,22 @@ public class ResultDialog extends Dialog {
 		getShell().setImage(ImageManagment.getRegistry().get(ImageManagment.SHELL_ICON));
 		return comp;
 	}
-	
-		protected void addTable(Composite parent) {
+		
+	/**
+	 * Erzeugt die Tabelle zur Anzeige der URLs, die eine Mindestbewertung erhalten
+	 * haben. 
+	 * @param parent Composite, in dem die Tabelle angezeigt werden soll
+	 * @return RatingTable, in dem die Einzelwertungen angezeigt werden
+	 */
+		protected RatingTable addTable(Composite parent) {
 			Composite child = new Composite(parent, SWT.NONE);
 			child.setLayout(MyLayoutFactory.createGrid(1, true));
 			Composite tvComp = new Composite(child, SWT.NONE);
 			tvComp.setLayout(new FillLayout());	
 			tvComp.setLayoutData(getGridData());
-			new WebtraceTable(tvComp, model.getOpenProject().getWebtrace(), model);
-	
+			return new WebtraceTable(tvComp, 
+					model.getOpenProject().getWebtrace(), model).getRatingTable();
+			//die Instanz von RatingTable abfragen und zurückgeben			
 	}
 		
 		private GridData getGridData() {
@@ -141,16 +135,19 @@ public class ResultDialog extends Dialog {
 
 	protected void addListeners() {
 		resultsViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+			//TODO an die Kommentare anschliessen
 			public void selectionChanged(SelectionChangedEvent event) {
-				// if the selection is empty clear the label
+				// if the selection is empty do nothing
 				if(event.getSelection().isEmpty()) {
-					text_selection.setText("");
 					return;
 				}
 				if(event.getSelection() instanceof IStructuredSelection) {
 					IStructuredSelection selection = (IStructuredSelection)event.getSelection();
 					Object selected = (Root) selection.getFirstElement();
-					text_selection.setText(labelProvider.getText(selected, RATING));
+					if(selected instanceof Webpage) {
+						singleRating.setInput((Webpage)selected);
+					}
+					//text_selection.setText(labelProvider.getText(selected, RATING));
 				}
 			}
 		});

@@ -47,6 +47,7 @@ public class RatingTable extends Composite {
 	private TableViewer tableViewer;
 	private Webpage input;
 	private Text description_widget;
+	private Label label_rating;
 	private MyListener listener;
 	private Model model;
 	
@@ -64,8 +65,11 @@ public class RatingTable extends Composite {
 	
 	protected void setInput(Webpage page) {
 		if((page != null) && (tableViewer != null)) {
+			System.out.println("setLabel " + label_rating.getText());
 			tableViewer.setInput(page);
 			input = page;
+			label_rating.setText(
+					GetText.gettext("SINGLE_RATING") + ": " + page.getTitle());
 			model.getOpenProject().getWebtrace().loadNotes(page.getURL());
 		}
 	}
@@ -78,10 +82,11 @@ public class RatingTable extends Composite {
 		Composite notesComp = new Composite(sash, SWT.NONE);
 		notesComp.setLayout(MyLayoutFactory.createGrid(1, false));
 		
-		Label label_rating = new Label(ratingComp, SWT.SHADOW_NONE);
+		label_rating = new Label(ratingComp, SWT.SHADOW_NONE);
 		label_rating.setText(GetText.gettext("SINGLE_RATING"));	
-		GridData data1 = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
+		GridData data1 = new GridData(GridData.FILL_HORIZONTAL);
 		data1.verticalSpan = 1;
+		//data1.grabExcessHorizontalSpace = true;
 		data1.horizontalSpan = 1;
 		label_rating.setLayoutData(data1);
 		
