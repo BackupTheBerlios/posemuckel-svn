@@ -35,7 +35,7 @@ please do read the Apache-License.txt.
 
 junit.jar
 
-ist distributet under the terms of the Common Public License.
+is distributet under the terms of the Common Public License.
 See Common-Public-License.txt for details.
 
 java-getopt-1.0.12.jar

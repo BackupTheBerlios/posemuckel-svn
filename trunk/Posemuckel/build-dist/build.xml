@@ -182,9 +182,9 @@ Das läuft hier so ab:
 </target>	
 	
 	
-<!--target name="server" description="generate the server jar" -->
+<target name="server" description="generate the server jar">
 		<!-- Erzeuge eine JAR-Datei für den Server -->
-		<!--jar jarfile="../dist/posemuckel-server-0.4.jar">
+		<jar jarfile="../dist/posemuckel-server-0.4.jar">
 	    	<fileset dir="../bin">
 	    		<exclude name="posemuckel/client/**"/>
 	    		<exclude name="**/*Test*"/>
@@ -199,42 +199,40 @@ Das läuft hier so ab:
 			 <attribute name="Class-Path" value="lib/log4j-1.2.12.jar lib/mysql-connector-java-3.1.11-bin.jar lib/java-getopt-1.0.12.jar"/>
 			</manifest>
 		</jar>
-</target-->
+</target>
 	
 <!--Server-
-Das nachfolgende Target erzeugt ein mit Gzip komprimiertes Tar-Archiv.
-Dieses Target läuft nur unter Linux!
+Das nachfolgende Target erzeugt ein ZIP-Archiv.
 
-Zunächst wird aber erstmal ein JAR speziell für Linux erszeugt.
+Zunächst wird aber erstmal ein JAR erzeugt.
 Dafür sorgt die Abhängigkeit dieses Targets.
-
-Das läuft hier so ab:
-2. lösche das alte tgz-Archiv
-3. stelle erstmal ein tar-Archiv zusammen
-4. komprimiere das tar
-5. lösche überflüssige Dateien, damit von diesem Prozess nur das tgz übrig bleibt
 -->
-<!--target name="server-bin-tgz" depends="server" description="generate the server linux distribution" >
- 		<delete file="../dist/posemuckel-server-bin-0.4.tgz"/-->
+<target name="server-bin-zip" depends="server" description="generate the server linux distribution" >
+ 		<delete file="../dist/posemuckel-server-bin-0.4.zip"/>
 		<!-- Erzeuge eine Tar-Gzip-Datei mit dem Client drin -->
-		<!--tar destfile="../dist/posemuckel-server-bin-0.4.tar">
-			<tarfileset dir="." includes="LICENSE.txt" prefix="posemuckel-server-bin-0.4"/>
-			<tarfileset dir="." includes="AUTHORS.txt" prefix="posemuckel-server-bin-0.4"/>
-			<tarfileset dir="../dist" includes="posemuckel-server-0.4.jar" prefix="posemuckel-server-bin-0.4"/-->
+		<zip destfile="../dist/posemuckel-server-bin-0.4.zip">
+			<zipfileset dir="." includes="LICENSE.txt" prefix="posemuckel-server-bin-0.4"/>
+			<zipfileset dir="." includes="AUTHORS.txt" prefix="posemuckel-server-bin-0.4"/>
+			<zipfileset dir="." includes="README.txt" prefix="posemuckel-server-bin-0.4"/>
+			<zipfileset dir="." includes="INSTALL-server.txt" fullpath="posemuckel-server-bin-0.4/INSTALL.txt"/>
+			<zipfileset dir="." includes="INSTALL-de-server.txt" fullpath="posemuckel-server-bin-0.4/INSTALL-de.txt"/>
+			<zipfileset dir="../dist" includes="posemuckel-server-0.4.jar" prefix="posemuckel-server-bin-0.4"/>
+			<zipfileset file="../src/posemuckel/server/posemuckel_server.cfg" prefix="posemuckel-server-bin-0.4"/>
 			<!-- Das lib-Verzeichnis befüllen -->
-			<!--tarfileset dir="../lib" includes="log4j-1.2.12.jar" prefix="posemuckel-server-bin-0.4/lib"/>
-			<tarfileset dir="../lib" includes="java-getopt-1.0.12.jar" prefix="posemuckel-server-bin-0.4/lib"/>
-			<tarfileset dir="../lib" includes="mysql-connector-java-3.1.11-bin.jar" prefix="posemuckel-server-bin-0.4/lib"/>				
-			<tarfileset dir="../lib" includes="3RD-PARTY-LICENSES.txt" prefix="posemuckel-client-bin-0.4/lib"/>
-			<tarfileset dir="../lib" includes="Apache-License.txt" prefix="posemuckel-client-bin-0.4/lib"/>
-			<tarfileset dir="../lib" includes="Common-Public-License.txt" prefix="posemuckel-client-bin-0.4/lib"/-->
+			<zipfileset dir="../lib" includes="log4j-1.2.12.jar" prefix="posemuckel-server-bin-0.4/lib"/>
+			<zipfileset dir="../lib" includes="java-getopt-1.0.12.jar" prefix="posemuckel-server-bin-0.4/lib"/>
+			<zipfileset dir="../lib" includes="mysql-connector-java-3.1.11-bin.jar" prefix="posemuckel-server-bin-0.4/lib"/>				
+			<zipfileset dir="../lib" includes="3RD-PARTY-LICENSES.txt" prefix="posemuckel-server-bin-0.4/lib"/>
+			<zipfileset dir="../lib" includes="Apache-License.txt" prefix="posemuckel-server-bin-0.4/lib"/>
+			<zipfileset dir="../lib" includes="Common-Public-License.txt" prefix="posemuckel-server-bin-0.4/lib"/>
 			<!-- Das doc-Verzeichnis befüllen -->
-			<!--tarfileset dir="../doc" includes="" prefix="posemuckel-client-bin-0.4/doc"/-->
-		<!--/tar>
-		<gzip src="../dist/posemuckel-server-bin-0.4.tar" destfile="../dist/posemuckel-server-bin-0.4.tgz"/>
-	 	<delete file="../dist/posemuckel-server-bin-0.4.tar"/>
+			<zipfileset dir="../doc" includes="posemuckel_sag_de.pdf" prefix="posemuckel-server-bin-0.4/doc"/>
+			<zipfileset dir="../doc/userdoc" prefix="posemuckel-server-bin-0.4/doc/userdoc"/>
+			<!-- Das server-Verzeichnis befüllen -->
+			<zipfileset dir="../server" prefix="posemuckel-server-bin-0.4/server"/>
+		</zip>
 		<delete file="../dist/posemuckel-server-0.4.jar"/>
-</target-->	
+</target>	
 
 	
 </project>

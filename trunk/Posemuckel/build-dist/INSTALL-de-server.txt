@@ -1,0 +1,22 @@
+So bringst du den Server zum Laufen:
+
+1. Installiere java 1.5, mysql, apache und php4. Dafür kannst du auch XAMPP
+   nehmen. Wenn der Server auch Einladungen per Mail verschicken soll, benötigst
+   du noch einen MTA wie postfix oder so.
+
+2. Apache muss server/www als Wurzelverzeichnis nehmen und dort die
+   php4 Scripte ausführen. Das Verzeichnis doc muss auf doc in diesem Verzeichis hier
+   zeigen, wenn auf der Website auch Doku zu sehen sein soll. Eine besipielhafte
+   httpd.conf liegt in server/conf/.
+   
+3. Für MySQL benötigst du einen Benutzer und ein Passwort für eine neue DB. Diese DB
+   kann dann wie folgt angelegt werden:
+   mysql -u [user] -p < server/db.sql
+
+4. Die Konfigurationsdatei posemuckel_server.cfg muss nun auch angepasst werden. Lies hierzu
+   bitte die Kommentare in der Datei. Wenn du z.B. einen MTA installiert hast, dann musst du
+   DO_SENDMAIL auf yes setzen und die Kommandozeile des Aufrufs zum Verschicken von Mails
+   anpassen.
+   
+5. Starte den Server wie folgt:
+   java -jar posemuckel-server-0.4.jar -c posemuckel_server.cfg

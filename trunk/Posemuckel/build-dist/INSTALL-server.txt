@@ -1,0 +1,22 @@
+To install and run the server, do this:
+
+1. Install java 1.5, mysql, apache and php4. You can use XAMPP, for example. If you want
+   your Server to send mail invitations to users, you will probably need
+   a mail transfer agent like postfix etc.
+
+2. Configure apache to use server/www as document root and to execute
+   php4 script files in this directory. Redirect doc to the doc directory,
+   if you want to present some documentation on the site. An example httpd.conf
+   file can be found in server/conf/.
+   
+3. Create a DB user for MySQL and create the posemuckel Database using server/db.sql.
+   For example like this:
+   mysql -u [user] -p < server/db.sql
+
+4. Edit the example posemuckel server configuration file named posemuckel_server.cfg.
+   If you have installed a mail transfer agent, then you schould set DO_SENDMAIL to yes
+   and configure the command line used.
+   
+5. Run the server using this command:
+   java -jar posemuckel-server-0.4.jar -c posemuckel_server.cfg
+   
