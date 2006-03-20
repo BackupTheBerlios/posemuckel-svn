@@ -35,11 +35,13 @@ import org.eclipse.swt.widgets.Text;
 import posemuckel.client.gui.Colors;
 import posemuckel.client.gui.MyLayoutFactory;
 import posemuckel.client.gui.actions.GoogleAction;
+import posemuckel.client.model.FollowMeManager;
 import posemuckel.client.model.Model;
 import posemuckel.client.model.Person;
 import posemuckel.client.model.Project;
 import posemuckel.client.model.Visitor;
 import posemuckel.client.model.Webpage;
+import posemuckel.client.model.event.FollowMeListener;
 import posemuckel.client.model.event.NotifyEvent;
 import posemuckel.client.model.event.NotifyListener;
 import posemuckel.client.model.event.WebTraceAdapter;
@@ -64,8 +66,10 @@ public class CreateBrowser {
 	//private String actualURL;
 	private boolean send = false;
 	private boolean titleset = false;
-	//Name des Anwenders, dem gefolgt werden soll
-	private String followMeName;
+	
+	private FollowMeManager followMe;
+	
+	
 	
 	private static String lastURL;
 	private Shell shell;
@@ -78,7 +82,20 @@ public class CreateBrowser {
 	 */
 	public CreateBrowser(final Composite parent){
 		addListener();
-		
+		followMe = Model.getModel().getOpenProject().getFollowMeManager();
+		followMe.addListener(new FollowMeListener() {
+
+			public void following(String name, FollowMeManager manager) {
+				if(browserComp.isDisposed()) {
+					manager.removeListener(this);
+					return;
+				}
+				activateFollowMe(name);
+			}
+
+			public void deactivation(FollowMeManager manager) {}
+			
+		});
 		shell=parent.getShell();
 		parent.setLayout(MyLayoutFactory.createGrid(1, false));
 		parent.setLayoutData(new GridData(SWT.FILL, SWT.NONE, true, false));
@@ -379,16 +396,6 @@ public class CreateBrowser {
 		}
 	}
 	
-
-	/**
-	 * Fügt bisherigige Bewertungen der aktuellen Seite in deie Combobox ein
-	 * @param name Name des Bewerters
-	 * @param vote	Bewertung
-	 */
-	public void _addPreviousVotes(String name, int vote) {
-		//TODO entfernen
-		//alreadyVotedCombo.add(name+":\t"+vote);		
-	}
 	
 	/**
 	 * Fügt den Namen eines Besuchers hinzu.
@@ -409,7 +416,11 @@ public class CreateBrowser {
 		Webpage page = Model.getModel().getOpenProject().getWebtrace().getPageForUrl(url);
 		if(page == null) return;
 		Visitor[] visitors = page.getVisitors();
-		textVisitors.setText("");
+		if(!textVisitors.isDisposed()) {
+			textVisitors.setText("");
+		} else {
+			return;
+		}
 		int endOfText = 0;
 		if(visitors != null && visitors.length != 0) {
 			//alreadyVotedCombo.removeAll();
@@ -447,9 +458,7 @@ public class CreateBrowser {
 		Model.getModel().getOpenProject().getWebtrace().addListener(new WebTraceAdapter() {
 
 			public void visiting(WebTraceEvent event) {
-				if(followMeName != null) {
-					follow(event.getURL(), event.getUser());
-				}
+				follow(event.getURL(), event.getUser());
 				updateVisitorLabel(event.getURL());
 			}
 			
@@ -474,7 +483,7 @@ public class CreateBrowser {
 			private void follow(final String url, final String name) {
 				Runnable run = new Runnable() {
 					public void run() {
-						if(name.equals(followMeName) && !browser.isDisposed()) {
+						if(followMe.isFollowing(name) && !browser.isDisposed()) {
 							if(!url.equals(Model.getModel().getUser().getURL()))
 								browser.setUrl(url);
 						}
@@ -493,9 +502,7 @@ public class CreateBrowser {
 
 			public void viewing(WebTraceEvent event) {
 				//TODO falls der aktuellen URL entsprechend, anzeigen
-				if(followMeName != null) {
-					follow(event.getRoot().getName(), event.getUser());
-				}
+				follow(event.getRoot().getName(), event.getUser());
 				updateVisitorLabel(event.getURL());
 			}
 			
@@ -609,17 +616,13 @@ public class CreateBrowser {
 	 * @param name
 	 * @param active
 	 */
-	public void activateFollowMe(String name, boolean active) {
-		if(active) {
+	public void activateFollowMe(String name) {
+			//setzt den Browser auf die URL des Anwenders, dem gefolgt wird
 			String url = Model.getModel().getUser().getURL();
 			String otherURL = Model.getModel().getAllPersons().getMember(name).getURL();
 			if(url != null && !url.equals(otherURL)) {
 				setURL(otherURL);
 			}
-			followMeName = name;
-		} else {
-			followMeName = null;
-		}
 	}
 	
 }

@@ -23,11 +23,11 @@ import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.TreeItem;
 
 import posemuckel.client.gui.NoteDialog;
-import posemuckel.client.model.Chat;
+import posemuckel.client.model.FollowMeManager;
 import posemuckel.client.model.Model;
-import posemuckel.client.model.User;
 import posemuckel.client.model.Webpage;
 import posemuckel.client.model.Webtrace;
+import posemuckel.client.model.event.FollowMeListener;
 import posemuckel.client.model.event.WebTraceAdapter;
 import posemuckel.client.model.event.WebTraceEvent;
 import posemuckel.common.GetText;
@@ -48,7 +48,8 @@ public class CreateTreeView {
 	private Shell shell;
 	private Webpage selected=null;
 	private String myname;
-
+	
+	private FollowMe followMe;
 	
 	private class adapter extends WebTraceAdapter  {
 		private Webtrace trace;
@@ -233,26 +234,20 @@ public class CreateTreeView {
 
 		//die Actions hängen davon ab, was für ein Webtrace angezeigt wird
 		if((name != null) && (!name.equals(Model.getModel().getUser().getNickname()))){
-			//System.out.println("add " + name);
+			
 			Action actionFollowMe = new Action (GetText.gettext("FOLLOW_ME")) {
-				private boolean active = true;
 				public void run() {
-					Model mod = Model.getModel();
-					User user = mod.getUser();
-					String myself = user.getNickname();
-					Chat chat = mod.getLogchat();
-					String msg;
-					if(active)
-						msg = "Benutzer "+myself+" folgt "+name+".";
-					else
-						msg = "Benutzer "+myself+" folgt "+name+" nicht mehr.";
-					if (chat != null)
-						chat.userIsChatting(msg);
-					createBrowser.activateFollowMe(name, active);
 					//zum deaktivieren den boolschen Wert auf false setzen
 					//der Name ist dabei egal
-					createBrowser.activateFollowMe(name, active);
-					active = !active;
+					boolean active = this.isChecked();
+					FollowMeManager fmng = Model.getModel().getOpenProject().getFollowMeManager();
+					if(active) {//FollowMeModus einschalten
+						fmng.follow(name);
+						followMe = new FollowMe(this);
+						fmng.addListener(followMe);
+					} else {//FollowMeModus ausschalten
+						fmng.deactivate();
+					}
 				}
 			};
 			actionFollowMe.setChecked(false);
@@ -271,58 +266,6 @@ public class CreateTreeView {
 
 		tabItem.setControl(child);	
 	}
-		
-	
-	
-//	public void addNode(String title, String url, String previous) {
-//		boolean root=previous.equals(""); 
-//		boolean found=false;
-//		System.out.println("CreateTreeView:");
-//		System.out.println("ArraySize: " + itemList.size());
-//		CreateTreeNode node = new CreateTreeNode();
-//		if (itemList.isEmpty()==false){
-//			System.out.println("Uebergebene URL:");
-//			System.out.println(url);
-//			for (int i=0; i<itemList.size(); i++) {
-//				System.out.println(itemList.get(i).getURL());
-//				if (url.equals(itemList.get(i).getURL())) {
-//					//lastIndex=i;
-//					System.out.println("match");
-//					found=true;;
-//					lastIndex=i;
-//					itemList.get(i).getThisItem().setText(title + " (" + url + ")");
-//				}
-//				else {
-//					System.out.println("no match");
-//				}
-//			}
-//			if (found==true) {
-//				itemList.add(itemList.get(lastIndex));
-//			}
-//		}
-//		if ((found==false) && (root==false) && (itemList.isEmpty()==false)) {
-//			node.url=url;
-//			lastItem=new TreeItem(itemList.get(itemList.size()-1).getThisItem(), SWT.NULL);
-//			lastItem.setText(title + "(" + url + ")");
-//			lastItem.setImage(Colors.getCircle(-1));
-//			lastItem.setData(url);
-//			node.thisItem=lastItem;
-//			itemList.add(node);
-//			//lastIndex=itemList.size();			
-//		}
-//	
-//		if ((found==false) && ((root==true) || (itemList.isEmpty()))) {
-//			node.url=url;
-//			lastItem=new TreeItem(traceTree, SWT.NULL);
-//			lastItem.setText(title + " (" + url + ")");
-//			lastItem.setImage(Colors.getCircle(-1));
-//			lastItem.setData(url);
-//			node.thisItem=lastItem;
-//			itemList.add(node);
-//			//lastIndex=itemList.size();					
-//		}
-//	}	
-
 	
 	private void addTraceListener() {
 		if( myadapter == null ) {
@@ -330,6 +273,64 @@ public class CreateTreeView {
 			myadapter = new adapter(trace);
 			trace.addListener(myadapter);
 		}
+	}
+	
+	/**
+	 * Deaktiviert die Action, sobald jemand anderem gefolgt wird.
+	 * @author Tanja Buttler
+	 *
+	 */
+	private class FollowMe implements FollowMeListener {
+		
+		private Action action;
+		
+		/**
+		 * Deaktiviert die Action, sobald jemand anderem gefolgt wird.
+		 * 
+		 * @param followMeAction Action, die deaktiviert werden soll
+		 */
+		FollowMe(Action followMeAction) {
+			action = followMeAction;
+		}
+		
+		/*
+		 *  (non-Javadoc)
+		 * @see posemuckel.client.model.event.FollowMeListener#following(java.lang.String, posemuckel.client.model.FollowMeManager)
+		 */
+		public void following(String following, FollowMeManager manager) {
+			if(traceTree.getTree().isDisposed()) {
+				manager.removeListener(this);
+				return;
+			}
+			if(!following.equals(name)) {
+				work(manager);			
+			}
+		}
+		
+		/*
+		 *  (non-Javadoc)
+		 * @see posemuckel.client.model.event.FollowMeListener#deactivation(posemuckel.client.model.FollowMeManager)
+		 */
+		public void deactivation(FollowMeManager manager) {
+			if(traceTree.getTree().isDisposed()) {
+				manager.removeListener(this);
+				return;
+			}
+			work(manager);		
+		}
+		
+		/**
+		 * Entfernt diesen Listener aus dem FollowMeManager und deaktiviert den 
+		 * Button, falls noch nicht geschehen.
+		 * @param manager FollowMeManager des geöffneten Projektes
+		 */
+		private void work(FollowMeManager manager) {
+			manager.removeListener(this);
+			if(action.isChecked()) {
+				action.setChecked(false);
+			}
+		}
+		
 	}
 	
 }

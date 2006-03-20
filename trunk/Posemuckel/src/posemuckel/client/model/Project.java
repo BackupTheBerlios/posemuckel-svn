@@ -58,6 +58,7 @@ public class Project {
 	private boolean useViewing;
 	private String[] notifydata;
 	private ListenerManagment<NotifyListener> listenerManagment;
+	private FollowMeManager followMe;
 	
 	/**
 	 * Erstellt ein neues Projekt. Diese Methode sollte nur verwendet werden, 
@@ -524,6 +525,18 @@ public class Project {
 		for (NotifyListener notifyListener : listener) {
 			notifyListener.newurl(url);
 		}
+	}
+	
+	/**
+	 * Gibt den FollowMeManager des Projektes aus. Der FollowMeManager sollte nur 
+	 * für geöffnete Projekte verwendet werden.
+	 * @return FollowMeManager
+	 */
+	public FollowMeManager getFollowMeManager()  {
+		if(followMe == null) {
+			followMe = new FollowMeManager(model.getLogchat(), model.getUser().getNickname());
+		}
+		return followMe;
 	}
 	
 	/**
