@@ -264,7 +264,6 @@ public class DB {
 	 */
 	public boolean existsUser(String name) throws SQLException{
 		String query = "SELECT nickname FROM user WHERE nickname='"+name+"';";
-		System.out.println(query);
 		dbresult = statement.executeQuery(query);
 		if(!dbresult.next()) {
 			return false;
@@ -275,6 +274,24 @@ public class DB {
 		return true;
 	}
 
+	/**
+	 * Gibt an, ob es bereits ein Projekt mit dem angegebenen Namen gibt.
+	 * @param title Titel des Projektes
+	 * @return true, falls es schon ein Projekt mit diesem Namen gibt, false sonst
+	 * @throws SQLException
+	 */
+	public boolean projectExists(String title) throws SQLException{
+		String query = "SELECT project_title FROM projects WHERE project_title='"+title+"';";
+		dbresult = statement.executeQuery(query);
+		if(!dbresult.next()) {
+			return false;
+		} else {
+			checkIP(dbresult.getString("project_title"));
+	    }
+		connection.commit();	
+		return true;
+	}
+	
 	/**
 	 * Fügt einen Chattext mit Zeitstempel in die Datenbank ein.
 	 * @param text der einzufügende Text

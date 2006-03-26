@@ -175,6 +175,7 @@ public class ClientMessage extends Message_Handler {
     		IOException, SQLException {
 	    boolean b = true;
 	    if (model.isLoggedIn(hash)) {
+	    	// Erstmal alles einlesen:
 	    	String user = model.getUser(hash);
 	    	String topic = in.readLine();
 	    	topic = GetText.escape_sql_write(topic);
@@ -186,6 +187,24 @@ public class ClientMessage extends Message_Handler {
 		    String maxUsers = in.readLine();
 		    String description = in.readLine();
 	    	description = GetText.escape_sql_write(description);
+	   
+	    	// So, jetzt müssen wir schauen, ob es so ein
+	    	// Projekt mit diesem Namen schon gibt.
+	    	try{
+	    		if(data.projectExists(topic)){
+	    			// Wenn ja, wird die Abarbeitung der Anfrage beendet.
+	    			servermess.error(thisclient,"", id);
+	    			return true;
+	    		}
+	    	} catch(SQLException e) {
+	    		// Dieser catch-Block ist hier notwendig,
+	    		// weil nur hier die aktuelle Nachtichten-ID
+	    		// zur Verfügung steht.
+    			servermess.error(thisclient,"", id);
+    			return true;
+	    	}
+	    	
+	    	// Alles klar, das Projekt kann angelegt werden:
 		    Integer c = new Integer(count);
 		    String[] userToInvite = GetText.escape_sql_write(parse(in,c.intValue()-4, "START_PROJECT"));
 		    int projectID = data.addProject(user, topic, isPrivate,
