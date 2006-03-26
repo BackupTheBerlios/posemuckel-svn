@@ -245,8 +245,20 @@ public class StartProjectDialog extends Dialog {
 		button_invite.addListener( SWT.Selection,
 				 new Listener() {
 					public void handleEvent(Event arg0) {
+						boolean ok = true;
+						int max;
+						String num = combo_maxusers.getText();
+						if ( !num.equals("") ) {
+							// Wenn im Feld für die maximale Teilnehmerzahl nichts
+							// steht, entfällt die Prüfung.
+							max = Integer.valueOf(combo_maxusers.getText());
+							if ( InvitedList.getItemCount() >= max - 1 ) {
+								Messages.showError(GetText.gettext("TOO_MANY_INVITATIONS"),GetText.gettext("TOO_MANY_INVITATIONS_TITLE"));
+								ok = false;
+							}
+						}
 						String[] selected = BuddyList.getSelection();
-						if ( selected.length != 0 ) {
+						if ( ok && selected.length != 0 ) {
 							for ( String buddy : selected ) {
 								BuddyList.remove(buddy);
 								InvitedList.add(buddy);
