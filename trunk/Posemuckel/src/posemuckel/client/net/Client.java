@@ -37,7 +37,7 @@ public class Client {
 	/**
 	 * Version des Meilensteins 
 	 */
-	protected final static String VERSION = "0.4";
+	protected final static String VERSION = "0.4.1";
 	
 	/*
 	 * Verbindung zum Server

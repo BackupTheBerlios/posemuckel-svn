@@ -11,5 +11,5 @@ export LD_LIBRARY_PATH=$INSTALL_DIR/lib
 
 
 cd $INSTALL_DIR
-$JAVA_BINARY -Djava.library.path=./lib -jar posemuckel-client-0.4.jar
+$JAVA_BINARY -Djava.library.path=./lib -jar posemuckel-client-0.4.1.jar
 cd $BACK_HERE
