@@ -35,11 +35,13 @@ import posemuckel.client.model.event.WebTraceEvent;
 import posemuckel.common.GetText;
 
 /**
+ * In einem RatingTable werden die einzelnen Bewertungen der Anwender zu einer 
+ * Webseite tabellarisch dargestellt. Für jeden Anwender wird aufgeführt, ob Notizen
+ * zu dieser Webseite vorhanden sind. 
  * 
  * @author Posemuckel Team
  *
  */
-
 public class RatingTable extends Composite {
 	
 	private Table table;

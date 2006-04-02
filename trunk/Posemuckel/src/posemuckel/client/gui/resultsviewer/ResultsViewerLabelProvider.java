@@ -50,30 +50,12 @@ public class ResultsViewerLabelProvider extends LabelProvider
 			if(((Webpage)element).getTitle() == null) {
 				return "no title";
 			} else {
-				return ((Webpage)element).getTitle() 
-				+" (" + ((Webpage)element).getName() + ")";
+				return ((Webpage)element).getTitle(); 
+				//+" (" + ((Webpage)element).getName() + ")";
 			}
 		} else {
 			throw unknownElement(element);
 		}
-	}
-	
-	public String getText(Object element, int output) {
-		if(output == ResultDialog.RATING) {
-			if (element instanceof Webpage) {
-				String comment = ((Webpage)element).getComment();
-				if( comment == null) {
-					return "No Comment";
-				} else {
-					return comment;
-				}
-			} else if(element instanceof Folder) {
-				return "";
-			} else {
-				throw unknownElement(element);
-			}
-		}
-		return "No output specified";
 	}
 
 	public void dispose() {
