@@ -144,7 +144,7 @@ class ProjectTask extends TaskAdapter {
 			projects.confirmDelProject(project);
 			break;
 		case Database.ACK + NOTIFY:
-			project.confirmNotify();
+			project.fireNotifyConfirmation();
 			break;
 		default:
 			break;

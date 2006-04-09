@@ -228,13 +228,13 @@ public class Model implements InformationReceiver {
 		Project invitation = user.getInvitations().getProject(projectID);
 		//Projektdaten ändern
 		if(project != null) {
-			project.changeFreeSpaces(change);
+			project.changeFreeSeats(change);
 		}		
 		if(userProject != null && userProject != project) {
-			userProject.changeFreeSpaces(change);
+			userProject.changeFreeSeats(change);
 		}		
 		if(invitation != null && invitation != project && invitation != userProject) {
-			invitation.changeFreeSpaces(change);
+			invitation.changeFreeSeats(change);
 		}
 		//Listener benachrichtigen
 		getAllProjects().fireElementChanged(project, true);

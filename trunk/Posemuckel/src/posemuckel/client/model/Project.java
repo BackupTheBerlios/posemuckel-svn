@@ -6,6 +6,7 @@ package posemuckel.client.model;
 import java.util.ArrayList;
 
 import posemuckel.client.model.event.ListenerManagment;
+import posemuckel.client.model.event.NotifyEvent;
 import posemuckel.client.model.event.NotifyListener;
 
 
@@ -23,7 +24,6 @@ import posemuckel.client.model.event.NotifyListener;
  */
 public class Project {
 	//TODO den Teil zum geöffneten Projekt in eine separate Klasse verschieben?
-	//TODO fire
 	public static final String PUBLIC_TYPE = "1";
 	public static final String PRIVATE_TYPE = "0";
 	
@@ -42,7 +42,7 @@ public class Project {
 	private MemberList members;
 	private Model model;
 	private String freeSeats;
-	private String spaces;
+	private String seats;
 	private String chatID;
 	private String date;
 	private boolean open;
@@ -50,15 +50,9 @@ public class Project {
 	/**
 	 * nur für geöffnete Projekte relevant
 	 */
+	private OpenProjectExtension openExt;
 	
-	private Webtrace webtrace;
-	private String currentURL = "";
-	private String previousURL = "";
-	private String urlTitle = "";
-	private boolean useViewing;
-	private String[] notifydata;
 	private ListenerManagment<NotifyListener> listenerManagment;
-	private FollowMeManager followMe;
 	
 	/**
 	 * Erstellt ein neues Projekt. Diese Methode sollte nur verwendet werden, 
@@ -86,7 +80,7 @@ public class Project {
 	 * @return Die Notifikationsdaten als String-Array.
 	 */
 	public String[] getNotify() {
-		return notifydata;
+		return openExt.getNotify();
 	}
 	
 	/**
@@ -107,14 +101,7 @@ public class Project {
 	 * @return der Webtrace des Projektes
 	 */
 	public Webtrace getWebtrace() {
-		if(webtrace == null) {
-			webtrace = new Webtrace(this);
-			String[] names = members.getNicknames();
-			for (String name : names) {
-				webtrace.addUser(name);
-			}
-		}
-		return webtrace;
+		return openExt.getWebtrace();
 	}
 	
 	/**
@@ -144,7 +131,7 @@ public class Project {
 		this.topic = topic;
 		this.owner = owner;
 		this.freeSeats = freeSeats;
-		this.spaces = spaces;
+		this.seats = spaces;
 		this.description = description;
 		this.ispublic = isPublic;
 		this.date = date;
@@ -187,7 +174,7 @@ public class Project {
 		this.topic = topic;
 		this.owner = owner;
 		this.freeSeats = freeSeats;
-		this.spaces = spaces;
+		this.seats = spaces;
 		this.description = description;
 		this.ispublic = isPublic;		
 	}
@@ -198,7 +185,7 @@ public class Project {
 	 * @param max maximale Teilnehmerzahl
 	 */
 	public void setMaxNumber(int max) {
-		this.spaces = String.valueOf(max);
+		this.seats = String.valueOf(max);
 	}
 	
 	/**
@@ -264,7 +251,7 @@ public class Project {
 	 * @return Zahl der Pl&auml;tze
 	 */
 	public String getMaxNumber() {
-		return spaces;
+		return seats;
 	}
 
 	/**
@@ -356,7 +343,7 @@ public class Project {
 	 * &Auml;ndert die Zahl der freien Pl&auml;tze im Projekt.
 	 * @param change Anstieg oder Verringerung der Zahl der freien Plätze
 	 */
-	protected void changeFreeSpaces(int change) {
+	protected void changeFreeSeats(int change) {
 		int oldValue = new Integer(freeSeats).intValue();
 		oldValue = oldValue + change;
 		freeSeats = String.valueOf(oldValue);
@@ -368,6 +355,7 @@ public class Project {
 	 */
 	void setOpen(String chatID) {
 		open = true;
+		openExt = new OpenProjectExtension(this);
 		this.chatID = chatID;
 	}
 	
@@ -400,7 +388,7 @@ public class Project {
 	 * @param url , die der Anwender gerade besucht
 	 */
 	public void setCurrentURL(String url){
-		currentURL = url;
+		openExt.setCurrentURL(url);
 	}
 	
 	/**
@@ -408,7 +396,7 @@ public class Project {
 	 * @param url 
 	 */
 	public void setPreviousURL(String url){
-		previousURL = url;
+		openExt.setPreviousURL(url);
 	}
 	
 	/**
@@ -418,22 +406,7 @@ public class Project {
 	 * @param url , zu der gesprungen wird
 	 */
 	public void jumpToURL(String url) {
-		if(getWebtrace().getPageForUrl(url, model.getUser().getNickname()) == null) {
-			//der Anwender hat die Seite noch nicht besucht, also eine neue Wurzel
-			setCurrentURL("");
-		} else {
-			//der Anwender kennt die Seite schon
-			useViewing = true;
-			setCurrentURL("");
-		}
-	}
-	
-	/**
-	 * Setzt den Titel der zuletzt besuchten Webseite.
-	 * @param title der zuletzt besuchten Webseite
-	 */
-	public void setUrlTitle(String title){
-		urlTitle =title;
+		openExt.jumpToURL(url);
 	}
 	
 	/**
@@ -441,7 +414,7 @@ public class Project {
 	 * @return zuletzt besuchte URL
 	 */
 	public String getCurrentURL(){
-		return currentURL;
+		return openExt.getCurrentURL();
 	}
 	
 	/**
@@ -449,42 +422,29 @@ public class Project {
 	 * @return vorletzte besuchte URL
 	 */
 	public String getPreviousURL(){
-		return previousURL;
+		return openExt.getPreviousURL();
 	}
 	
-	/**
-	 * Gibt den Titel der zuletzt besuchten Webseite aus.
-	 * @return Titel der zuletzt besuchten Webseite
+	/* (non-Javadoc)
+	 * @see posemuckel.client.model.OpenProjectExtension#getUrlTitle()
 	 */
-	public String getUrlTitle(){
-		return urlTitle;
+	public String getUrlTitle() {
+		return openExt.getUrlTitle();
 	}
-	
+
+	/* (non-Javadoc)
+	 * @see posemuckel.client.model.OpenProjectExtension#setUrlTitle(java.lang.String)
+	 */
+	public void setUrlTitle(String title) {
+		openExt.setUrlTitle(title);
+	}
+
 	/**
 	 * Sendet eine Visiting- oder eine Viewing-Nachricht an die Database.
 	 *
 	 */
 	public void visiting() {
-		//wenn die URLs gleich sind, wird visiting nicht ausgeführt
-		boolean doit = !getCurrentURL().equals(getPreviousURL());
-		if(doit) {
-			//wenn der Webtrace beide URLs für den Anwender 
-			//schon gespeichert hat, wird visiting nicht ausgeführt 
-			//das hat vor allem Einfluss auf den Back-und Forward-Button
-			doit = !webtrace.hasURL(model.getUser().getNickname(), getCurrentURL(), getPreviousURL());
-		}
-		//darf nur verwendet werden, wenn die URL auch tatsächlich benutzt wurde
-		if(useViewing) {
-			useViewing = (null != webtrace.getPageForUrl(
-					getCurrentURL(),model.getUser().getNickname()));
-		}
-		if(doit && !useViewing) {
-			new ProjectTask(model.getUser().getProjects(), this).execute(ProjectTask.VISITING);		
-		} else if(getModel().getUser().getURL() != getCurrentURL()){
-			//die Anzeige im Browser wurde geändert
-			useViewing = false;
-			new WebTraceTask(getWebtrace()).execute(WebTraceTask.VIEWING);
-		}
+		openExt.visiting();
 	}
 	
 	/**
@@ -496,35 +456,36 @@ public class Project {
 	 *
 	 */
 	public void useViewing() {
-		setCurrentURL("");
-		useViewing = true;
+		openExt.useViewing();
 	}
 
 	public void notify(String url, String title, String comment, String datalen, String imagedata, String[] user) {
-		this.notifydata = new String[user.length+5];
-		notifydata[0] = url;
-		notifydata[1] = title;
-		notifydata[2] = comment;
-		notifydata[3] = datalen;
-		notifydata[4] = imagedata;
-		for (int i=5; i < notifydata.length; i++)
-			notifydata[i] = user[i-5];
-	
-		new ProjectTask(null, this).execute(ProjectTask.NOTIFY);
+		openExt.notify(url, title, comment, datalen, imagedata, user);
 	}
 	
-	protected void confirmNotify() {
-		ArrayList<NotifyListener> listener = getListener();
-		for (NotifyListener notifyListener : listener) {
-			notifyListener.ack();
-		}
+	/**
+	 * Informiert die Listener, dass eine Notify-Nachricht von der Database an die
+	 * Empfänger weitergeleitet wurde.
+	 *
+	 */
+	protected void fireNotifyConfirmation() {
+		openExt.fireNotifyConfirmation();
 	}
 	
-	public void newURL(String url) {
-		ArrayList<NotifyListener> listener = getListener();		
-		for (NotifyListener notifyListener : listener) {
-			notifyListener.newurl(url);
-		}
+	/**
+	 * Informiert die Listener, dass der Anwender eine neue URL angeklickt hat.
+	 * @param url die neue URL
+	 */
+	public void fireNewURL(String url) {
+		openExt.fireNewURL(url);
+	}
+	
+	/**
+	 * Informiert die Listener über ein neues NotifyEvent.
+	 * @param event das NotifyEvent
+	 */
+	public void fireNotifyEvent(NotifyEvent event) {
+		event.fireNotifyEvent(this);
 	}
 	
 	/**
@@ -533,10 +494,7 @@ public class Project {
 	 * @return FollowMeManager
 	 */
 	public FollowMeManager getFollowMeManager()  {
-		if(followMe == null) {
-			followMe = new FollowMeManager(model.getLogchat(), model.getUser().getNickname());
-		}
-		return followMe;
+		return openExt.getFollowMeManager();
 	}
 	
 	/**

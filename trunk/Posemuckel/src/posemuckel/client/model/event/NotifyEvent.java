@@ -1,6 +1,10 @@
 package posemuckel.client.model.event;
 
+import java.util.ArrayList;
+
 import org.eclipse.swt.graphics.ImageData;
+
+import posemuckel.client.model.Project;
 
 
 /**
@@ -44,5 +48,16 @@ public class NotifyEvent {
 	
 	public ImageData getImageData() {
 		return imagedata;
+	}
+
+	/**
+	 * Informiert die Listener über ein neues NotifyEvent.
+	 * @param project TODO
+	 */
+	public void fireNotifyEvent(Project project) {
+		ArrayList<NotifyListener> listener = project.getListener();
+		for (NotifyListener notifyListener : listener) {
+			notifyListener.notify(this);
+		}
 	}
 }

@@ -2,14 +2,12 @@ package posemuckel.client.model;
 
 import java.io.ByteArrayInputStream;
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
 
 import org.apache.commons.codec.binary.Base64;
 import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.ImageLoader;
 
 import posemuckel.client.model.event.NotifyEvent;
-import posemuckel.client.model.event.NotifyListener;
 	
 	/**
 	 * Diese Klasse dient einzig und allein der Decodierung
@@ -56,13 +54,11 @@ import posemuckel.client.model.event.NotifyListener;
 				ImageData[] imgdata = imageLoader.data;
 				NotifyEvent ne = new NotifyEvent(user, url, title, comment, imgdata[0]);
 				Project proj = Model.getModel().getOpenProject();
-				ArrayList<NotifyListener> listener = proj.getListener();
-				for (NotifyListener notifyListener : listener) {
-					notifyListener.notify(ne);
-				}
+				proj.fireNotifyEvent(ne);
 			} catch (UnsupportedEncodingException e) {
 				e.printStackTrace();
 			}
 		}
+		
 	}
 
