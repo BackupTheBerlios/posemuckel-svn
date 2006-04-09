@@ -24,6 +24,12 @@ import posemuckel.server.AllServerTests;
  */
 public class AllTests {
 	
+	/**
+	 * Erstellt einen JUnit-Test mit allen Tests, die keinen laufenden
+	 * Server benötigen.
+	 * 
+	 * @return Test, der keinen Server benötigt
+	 */
 	public static Test suite() {
 		BasicConfigurator.configure();
 		TestSuite suite = new TestSuite("Test for posemuckel");

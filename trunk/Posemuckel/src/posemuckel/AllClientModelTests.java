@@ -21,7 +21,12 @@ import junit.framework.TestSuite;
  *
  */
 public class AllClientModelTests {
-
+	
+	/**
+	 * Erstellt einen JUnit-Test zum Testen der Funktionalität
+	 * des Clients
+	 * @return Test für die Client-Funktionen
+	 */
 	public static Test suite() {
 		TestSuite suite = new TestSuite("Test for posemuckel");
 		//$JUnit-BEGIN$

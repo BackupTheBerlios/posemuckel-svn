@@ -7,7 +7,7 @@ import posemuckel.server.ServerStart;
 import posemuckel.server.ServerStop;
 
 /**
- * hier werden alle Tests eingetragen, die &uuml;ber localhost auf den 
+ * Hier werden alle Tests eingetragen, die &uuml;ber localhost auf den 
  * Server zugreifen; der Server wird zu Beginn in einem Thread gestartet
  * und am Ende der Testsuite wieder gestoppt. Die Reihenfolge der Tests kann
  * nur bedingt geändert werden: das Starten und Stoppen des Server sollte nicht
@@ -37,7 +37,13 @@ import posemuckel.server.ServerStop;
  *
  */
 public class AllTestsOnRunningServer {
-
+	
+	/**
+	 * Erstellt einen JUnit-Test mit allen Tests, die einen laufenden
+	 * Server benötigen.
+	 * 
+	 * @return Test, der einen laufenden Server benötigt
+	 */
 	public static Test suite() {
 		TestSuite suite = new TestSuite("Test for posemuckel");
 		//$JUnit-BEGIN$
