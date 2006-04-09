@@ -81,7 +81,7 @@ public class NotificationDialog extends Dialog {
 			public void mouseDoubleClick(MouseEvent arg0) {}
 			public void mouseUp(MouseEvent arg0) {
 				Project proj = Model.getModel().getOpenProject();
-				proj.newURL(url);
+				proj.fireNewURL(url);
 			}
 		});
 		
