@@ -24,8 +24,8 @@ public class EnumsAndConstants {
 	public static final String[] LANG = { "DE", "EN" };
 	
 	// Der Standard-Port:
-	public static final String DefaultPort = "8081"; // als String
-	public static final int PORT = 8081; // als Int
+	public static final String DefaultPort = "20101"; // als String
+	public static final int PORT = 20101; // als Int
 	// Die Standard-Adresse:
 	public static final String DefaultAddress = "localhost";
 	// LS := LineSeparator :-)

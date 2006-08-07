@@ -69,7 +69,6 @@ public class Server {
   
     /**
      * Beendet den Server
-     *
      */
     public static synchronized void terminate() {
 	    terminated = true;
